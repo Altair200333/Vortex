@@ -13,7 +13,9 @@
 #include <cglm/cglm.h>
 #include <cglm/mat4.h>
 #include <cglm/types.h>
-
+#include "textType.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 bool EdgeViewMode = false;
 Player pl;
@@ -38,31 +40,32 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 	}
-	if (key == GLFW_KEY_W && action != GLFW_RELEASE)
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		translateM(&pl, pl.dir, speed);
 	}
-	if (key == GLFW_KEY_S && action != GLFW_RELEASE)
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
 		translateM(&pl, pl.dir, -speed);
 	}
-	if (key == GLFW_KEY_D && action != GLFW_RELEASE)
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
 		vec3 tr;
 		glm_vec3_cross(pl.dir, pl.up, tr);
 		translateM(&pl, tr, speed);
 	}
-	if (key == GLFW_KEY_A && action != GLFW_RELEASE)
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
 		vec3 tr;
 		glm_vec3_cross(pl.dir, pl.up, tr);
 		translateM(&pl, tr, -speed);
+		
 	}
-	if (key == GLFW_KEY_E && action != GLFW_RELEASE)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
 		translateM(&pl, pl.up, speed);
 	}
-	if (key == GLFW_KEY_Q && action != GLFW_RELEASE)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
 		translateM(&pl, pl.up, -speed);
 	}	
@@ -94,7 +97,7 @@ int main()
 	//Настройка GLFW
 	//Задается минимальная требуемая версия OpenGL. 
 	//Мажорная 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	//Минорная
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	//Установка профайла для которого создается контекст
@@ -129,6 +132,15 @@ int main()
 
 	unsigned long counter = 1;
 	
+
+	if (FT_Init_FreeType(&ft)) {
+		fprintf(stderr, "Could not init freetype library\n");
+	}
+	if (FT_New_Face(ft, "Acme-Regular.ttf", 0, &face)) {
+		fprintf(stderr, "Could not open font\n");
+	}
+	FT_Set_Pixel_Sizes(face, 0, 48);
+
 	GLfloat vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -201,12 +213,17 @@ int main()
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
+
 	Shader* s;
 	s = makeShader("vertexSh1.vs", "fragmentSh.fs");
 	Shader* lightShader;
 	lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
+
+	
+	//FT_New_Face(ft, "fonts/arial.ttf", 0, &face);
 
 	vec3 cubePositions[] = {
 		{0.0f,  0.0f,  0.0f}, 
@@ -219,6 +236,11 @@ int main()
 		{1.5f,  2.0f, -2.5f},
 		{1.5f,  0.2f, -1.5f},
 		{-1.3f,  1.0f, -1.5f}
+	};
+	vec3 pointLightPositions[] = {
+		{1.0f,  2.0f,  -5.0f},
+		{2.3f, -3.3f, -4.0f},
+		{-4.0f,  2.0f, -12.0f},
 	};
 	pl = initPlayer(44.9, width, height);
 
@@ -237,25 +259,52 @@ int main()
 		useShader(s);
 		setProjectionView(&pl, s);
 
-		setVec3(s, "lightColor", 1, 1, 1);
-		setVec3(s, "light.position", 0, 5, -5);
+		setInt(s, "pointLightsCount", 2);
+		setInt(s, "spotLightsCount", 1);
+
 		setVec3(s, "viewPos", pl.eye[0], pl.eye[1], pl.eye[2]);
-
-		setVec3(s, "light.ambient", 0.2f, 0.2f, 0.2f);
-		setVec3(s, "light.diffuse", 0.6f, 0.6f, 0.6f); // darken the light a bit to fit the scene
-		setVec3(s, "light.specular", 1.0f, 1.0f, 1.0f);
-		//setVec3(s, "light.direction", 1.0f, -1.0f, 1.0f);
-		setInt(s,  "light.type", 2);
-
-		//printf("%f %f %f \n", pl.dir[0], pl.dir[1], pl.dir[2]);
-		setVec3(s, "light.position", pl.eye[0], pl.eye[1], pl.eye[2]);
-		setVec3(s, "light.direction", pl.dir[0], pl.dir[1], pl.dir[2]);
-		setFloat(s,"light.cutOff", cos(3.14/180*12.5f));
-		setFloat(s,"light.outerCutOff", cos(3.14/180*19.5f));
-
-		setFloat(s,"light.constant", 1.0f);
-		setFloat(s,"light.linear", 0.09f);
-		setFloat(s,"light.quadratic", 0.032f);
+		// directional light
+		setVec3(s, "dirLight.direction", -0.2f, -1.0f, -0.3f);
+		setVec3(s, "dirLight.ambient", 0.05f, 0.05f, 0.05f);
+		setVec3(s, "dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+		setVec3(s, "dirLight.specular", 0.5f, 0.5f, 0.5f);
+		// point light 1
+		setVec3(s,"pointLights[0].position", pointLightPositions[0][0], pointLightPositions[0][1], pointLightPositions[0][2]);
+		setVec3(s,"pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+		setVec3(s,"pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+		setVec3(s,"pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+		setFloat(s,"pointLights[0].constant", 1.0f);
+		setFloat(s,"pointLights[0].linear", 0.09);
+		setFloat(s,"pointLights[0].quadratic", 0.032);
+		// point light 2
+		setVec3(s, "pointLights[1].position", pointLightPositions[1][0], pointLightPositions[1][1], pointLightPositions[1][2]);
+		setVec3(s, "pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+		setVec3(s, "pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+		setVec3(s, "pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+		setFloat(s, "pointLights[1].constant", 1.0f);
+		setFloat(s, "pointLights[1].linear", 0.09);
+		setFloat(s, "pointLights[1].quadratic", 0.032);
+		// point light 3
+		
+		setVec3(s, "pointLights[2].position", pointLightPositions[2][0], pointLightPositions[2][1], pointLightPositions[2][2]);
+		setVec3(s, "pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+		setVec3(s, "pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+		setVec3(s, "pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+		setFloat(s, "pointLights[2].constant", 1.0f);
+		setFloat(s, "pointLights[2].linear", 0.09);
+		setFloat(s, "pointLights[2].quadratic", 0.032);
+		
+		// spotLight
+		setVec3(s, "spotLight.position", pl.eye[0], pl.eye[1], pl.eye[2]);
+		setVec3(s, "spotLight.direction", pl.dir[0], pl.dir[1], pl.dir[2]);
+		setVec3(s, "spotLight.ambient", 0.03f, 0.03f, 0.03f);
+		setVec3(s, "spotLight.diffuse", 0.6f, 0.6f, 0.6f);
+		setVec3(s, "spotLight.specular", 1.0f, 1.0f, 1.0f);
+		setFloat(s,"spotLight.constant", 1.0f);
+		setFloat(s,"spotLight.linear", 0.09);
+		setFloat(s,"spotLight.quadratic", 0.032);
+		setFloat(s,"spotLight.cutOff", cos(GLM_PI/180 * 10.5f));
+		setFloat(s,"spotLight.outerCutOff", cos(GLM_PI / 180 * 17.0f));
 
 		setVec3(s, "material.ambient", 1.0f, 0.5f, 0.31f);
 		setVec3(s, "material.diffuse", 1.0f, 0.5f, 0.31f);
@@ -283,19 +332,22 @@ int main()
 
 		useShader(lightShader);
 		setProjectionView(&pl, lightShader);
-		mat4 LightModel = {
-					1, 0, 0, 0,
-					0, 1, 0, 0,
-					0, 0, 1, 0,
-					0, 0, 0, 1
-		};
-		glm_translate(LightModel, (vec3) {0, 5, -5});
-		glm_scale(LightModel, (vec3) { 0.3f, 0.3f, 0.3f });
-		GLint modelLoc = glGetUniformLocation(lightShader->Program, "model");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(LightModel));
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			mat4 LightModel = {
+						1, 0, 0, 0,
+						0, 1, 0, 0,
+						0, 0, 1, 0,
+						0, 0, 0, 1
+			};
+			glm_translate(LightModel, pointLightPositions[i]);
+			glm_scale(LightModel, (vec3) { 0.3f, 0.3f, 0.3f });
+			GLint modelLoc = glGetUniformLocation(lightShader->Program, "model");
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(LightModel));
 
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(lightVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		glBindVertexArray(0);
 
 

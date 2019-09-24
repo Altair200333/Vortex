@@ -107,3 +107,8 @@ void setVec4(Shader* sh, char* name, float x, float y, float z, float w)
 	GLint Location = glGetUniformLocation(sh->Program, name);
 	glUniform4f(Location, x, y, z, w);
 }
+void setMat4(Shader* sh, char* name, GLfloat* val)
+{
+	GLint Location = glGetUniformLocation(sh->Program, name);
+	glUniformMatrix4fv(Location, 1, GL_FALSE, val);
+}

@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\WORK\C\gpcop\cglm-master\include;E:\WORK\C\gpcop\glew-2.1.0\include;E:\WORK\C\gpcop\glfw-3.3\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\WORK\C\gpcop\glfw-3.3\build\src\Debug;E:\WORK\C\gpcop\glfw-3.3\build\CMakeFiles\Export\lib;E:\WORK\C\gpcop\glew-2.1.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\WORK\C\gpcop\SDL2-2.0.10\include;E:\WORK\C\gpcop\freetype-2.10.0\include;E:\WORK\C\gpcop\cglm-master\include;E:\WORK\C\gpcop\glew-2.1.0\include;E:\WORK\C\gpcop\glfw-3.3\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\WORK\C\gpcop\freetype-2.10.0\objs\Win32\Debug;E:\WORK\C\gpcop\glfw-3.3\build\src\Debug;E:\WORK\C\gpcop\glfw-3.3\build\CMakeFiles\Export\lib;E:\WORK\C\gpcop\glew-2.1.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -81,7 +81,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freetype.lib;opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -124,6 +124,7 @@
     <ClCompile Include="baseShader.c" />
     <ClCompile Include="Player.c" />
     <ClCompile Include="start1.c" />
+    <ClCompile Include="textType.c" />
     <ClCompile Include="worldObject.c" />
   </ItemGroup>
   <ItemGroup>
@@ -136,9 +137,12 @@
     <ClInclude Include="baseShader.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="renderManager.h" />
+    <ClInclude Include="textType.h" />
     <ClInclude Include="worldObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="textFragmentSh.fs" />
+    <None Include="textVertexSh.vs" />
     <None Include="vertexSh1.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
