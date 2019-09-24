@@ -16,6 +16,12 @@
     <Filter Include="Файлы ресурсов\Shaders">
       <UniqueIdentifier>{00e3cc26-371b-4799-92c2-7807fdbff1e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\Models">
+      <UniqueIdentifier>{623a4c87-f4b4-4882-9382-fa44a7ac9e53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы ресурсов\Models\STL">
+      <UniqueIdentifier>{f2036b84-6e19-4448-a4cd-7eaadec42e53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="start1.c">
@@ -35,13 +41,13 @@
     <Text Include="old1.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
-    <Text Include="fragmentSh.txt">
+    <Text Include="fragmentSh.fs">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </Text>
-    <Text Include="lightVertexShader.txt">
+    <Text Include="lightFragmentShader.fs">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </Text>
-    <Text Include="lightFragmentShader.txt">
+    <Text Include="lightVertexShader.vs">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </Text>
   </ItemGroup>
@@ -60,7 +66,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertexSh1.txt">
+    <None Include="vertexSh1.vs">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
   </ItemGroup>

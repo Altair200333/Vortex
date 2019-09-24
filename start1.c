@@ -103,7 +103,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Matrix..", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1000, 600, "Matrix..", NULL, NULL);
 	if (window == NULL)
 	{	
 		printf("Failed to create GLFW window \n");
@@ -204,9 +204,9 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 	Shader* s;
-	s = makeShader("vertexSh1.txt", "fragmentSh.txt");
+	s = makeShader("vertexSh1.vs", "fragmentSh.fs");
 	Shader* lightShader;
-	lightShader = makeShader("lightVertexShader.txt", "lightFragmentShader.txt");
+	lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
 
 	vec3 cubePositions[] = {
 		{0.0f,  0.0f,  0.0f}, 
@@ -222,6 +222,7 @@ int main()
 	};
 	pl = initPlayer(44.9, width, height);
 
+	//glEnable(GL_CULL_FACE);
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -237,12 +238,24 @@ int main()
 		setProjectionView(&pl, s);
 
 		setVec3(s, "lightColor", 1, 1, 1);
-		setVec3(s, "lightPos", 0, 5, -5);
+		setVec3(s, "light.position", 0, 5, -5);
 		setVec3(s, "viewPos", pl.eye[0], pl.eye[1], pl.eye[2]);
 
 		setVec3(s, "light.ambient", 0.2f, 0.2f, 0.2f);
-		setVec3(s, "light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
+		setVec3(s, "light.diffuse", 0.6f, 0.6f, 0.6f); // darken the light a bit to fit the scene
 		setVec3(s, "light.specular", 1.0f, 1.0f, 1.0f);
+		//setVec3(s, "light.direction", 1.0f, -1.0f, 1.0f);
+		setInt(s,  "light.type", 2);
+
+		//printf("%f %f %f \n", pl.dir[0], pl.dir[1], pl.dir[2]);
+		setVec3(s, "light.position", pl.eye[0], pl.eye[1], pl.eye[2]);
+		setVec3(s, "light.direction", pl.dir[0], pl.dir[1], pl.dir[2]);
+		setFloat(s,"light.cutOff", cos(3.14/180*12.5f));
+		setFloat(s,"light.outerCutOff", cos(3.14/180*19.5f));
+
+		setFloat(s,"light.constant", 1.0f);
+		setFloat(s,"light.linear", 0.09f);
+		setFloat(s,"light.quadratic", 0.032f);
 
 		setVec3(s, "material.ambient", 1.0f, 0.5f, 0.31f);
 		setVec3(s, "material.diffuse", 1.0f, 0.5f, 0.31f);

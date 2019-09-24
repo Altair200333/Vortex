@@ -127,9 +127,9 @@
     <ClCompile Include="worldObject.c" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="fragmentSh.txt" />
-    <Text Include="lightFragmentShader.txt" />
-    <Text Include="lightVertexShader.txt" />
+    <Text Include="fragmentSh.fs" />
+    <Text Include="lightFragmentShader.fs" />
+    <Text Include="lightVertexShader.vs" />
     <Text Include="old1.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -139,7 +139,7 @@
     <ClInclude Include="worldObject.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertexSh1.txt" />
+    <None Include="vertexSh1.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

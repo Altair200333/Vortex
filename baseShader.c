@@ -97,3 +97,13 @@ void setFloat(Shader* sh, char* name, float x)
 	GLint Location = glGetUniformLocation(sh->Program, name);
 	glUniform1f(Location, x);
 }
+void setInt(Shader* sh, char* name, int x)
+{
+	GLint Location = glGetUniformLocation(sh->Program, name);
+	glUniform1i(Location, x);
+}
+void setVec4(Shader* sh, char* name, float x, float y, float z, float w)
+{
+	GLint Location = glGetUniformLocation(sh->Program, name);
+	glUniform4f(Location, x, y, z, w);
+}

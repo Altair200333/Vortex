@@ -17,7 +17,7 @@ Player initPlayer(float fov, int w, int h)
 					0, 0, 1, 0,
 					0, 0, 0, 1 }, { 0.0f, 0.0f, 3.0f }, {0.0f, 0.0f, -1.0f}, { 0.0f, 1.0f, 0.0f }, fov };
 
-	glm_perspective(fov, w / h, 0.1f, 100.0f, pl.projection);
+	glm_perspective(fov, (float)w / h, 0.1f, 100.0f, pl.projection);
 	glm_look((vec3){ 0.0f, 0.0f, 3.0f }, (vec3) { 0.0f, 0.0f, -1.0f }, (vec3) { 0.0f, 1.0f, 0.0f }, pl.view);
 
 	return pl;
