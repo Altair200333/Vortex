@@ -52,7 +52,7 @@ struct SpotLight {
 uniform int pointLightsCount;
 uniform int spotLightsCount;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
-uniform SpotLight spotLight;
+uniform SpotLight spotLight[NR_SPOT_LIGHTS];
 uniform DirLight dirLight;
 uniform Material material;
 
@@ -72,9 +72,9 @@ void main()
     // фаза 2: Точечные источники
     for(int i = 0; i < pointLightsCount; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);   
-	//for(int i = 0; i < spotLightsCount; i++)
-    //    result += CalcSpotLight(spotLight[i], norm, FragPos, viewDir);     		
-    result += CalcSpotLight(spotLight, norm, FragPos, viewDir);   
+	for(int i = 0; i < spotLightsCount; i++)
+        result += CalcSpotLight(spotLight[i], norm, FragPos, viewDir);     		
+    //result += CalcSpotLight(spotLight, norm, FragPos, viewDir);   
     color = vec4(result, 1.0);
 	
 }

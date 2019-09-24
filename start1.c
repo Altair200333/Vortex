@@ -295,16 +295,16 @@ int main()
 		setFloat(s, "pointLights[2].quadratic", 0.032);
 		
 		// spotLight
-		setVec3(s, "spotLight.position", pl.eye[0], pl.eye[1], pl.eye[2]);
-		setVec3(s, "spotLight.direction", pl.dir[0], pl.dir[1], pl.dir[2]);
-		setVec3(s, "spotLight.ambient", 0.03f, 0.03f, 0.03f);
-		setVec3(s, "spotLight.diffuse", 0.6f, 0.6f, 0.6f);
-		setVec3(s, "spotLight.specular", 1.0f, 1.0f, 1.0f);
-		setFloat(s,"spotLight.constant", 1.0f);
-		setFloat(s,"spotLight.linear", 0.09);
-		setFloat(s,"spotLight.quadratic", 0.032);
-		setFloat(s,"spotLight.cutOff", cos(GLM_PI/180 * 10.5f));
-		setFloat(s,"spotLight.outerCutOff", cos(GLM_PI / 180 * 17.0f));
+		setVec3(s, "spotLight[0].position", pl.eye[0], pl.eye[1], pl.eye[2]);
+		setVec3(s, "spotLight[0].direction", pl.dir[0], pl.dir[1], pl.dir[2]);
+		setVec3(s, "spotLight[0].ambient", 0.03f, 0.03f, 0.03f);
+		setVec3(s, "spotLight[0].diffuse", 0.6f, 0.6f, 0.6f);
+		setVec3(s, "spotLight[0].specular", 1.0f, 1.0f, 1.0f);
+		setFloat(s,"spotLight[0].constant", 1.0f);
+		setFloat(s,"spotLight[0].linear", 0.09);
+		setFloat(s,"spotLight[0].quadratic", 0.032);
+		setFloat(s,"spotLight[0].cutOff", cos(GLM_PI/180 * 10.5f));
+		setFloat(s,"spotLight[0].outerCutOff", cos(GLM_PI / 180 * 17.0f));
 
 		setVec3(s, "material.ambient", 1.0f, 0.5f, 0.31f);
 		setVec3(s, "material.diffuse", 1.0f, 0.5f, 0.31f);
