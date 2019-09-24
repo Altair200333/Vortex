@@ -86,3 +86,14 @@ Shader* makeShader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	
 	return shader;
 }
+
+void setVec3(Shader* sh, char* name, float x, float y, float z)
+{
+	GLint Location = glGetUniformLocation(sh->Program, name);
+	glUniform3f(Location, x, y, z);
+}
+void setFloat(Shader* sh, char* name, float x)
+{
+	GLint Location = glGetUniformLocation(sh->Program, name);
+	glUniform1f(Location, x);
+}

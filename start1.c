@@ -222,7 +222,7 @@ int main()
 	};
 	pl = initPlayer(44.9, width, height);
 
-
+	
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -235,17 +235,22 @@ int main()
 		glBindVertexArray(containerVAO);
 		useShader(s);
 		setProjectionView(&pl, s);
+
+		setVec3(s, "lightColor", 1, 1, 1);
+		setVec3(s, "lightPos", 0, 5, -5);
+		setVec3(s, "viewPos", pl.eye[0], pl.eye[1], pl.eye[2]);
+
+		setVec3(s, "light.ambient", 0.2f, 0.2f, 0.2f);
+		setVec3(s, "light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
+		setVec3(s, "light.specular", 1.0f, 1.0f, 1.0f);
+
+		setVec3(s, "material.ambient", 1.0f, 0.5f, 0.31f);
+		setVec3(s, "material.diffuse", 1.0f, 0.5f, 0.31f);
+		setVec3(s, "material.specular", 0.5f, 0.5f, 0.5f);
+		setFloat(s,"material.shininess", 32.0f);
+
 		for (unsigned int i = 0; i < 10; i++)
 		{
-
-			GLint lightColorLocation = glGetUniformLocation(s->Program, "lightColor");
-			glUniform3f(lightColorLocation, 1, 1, 1);
-
-			GLint vertexColorLocation = glGetUniformLocation(s->Program, "objectColor");
-			glUniform3f(vertexColorLocation, 1 - 0.07f*i, (float)1/(i+1)+0.0f, 0.5f);
-
-			GLint lightPosLocation = glGetUniformLocation(s->Program, "lightPos");
-			glUniform3f(lightPosLocation, 0, 5, -5);
 			
 			mat4 model = {
 					1, 0, 0, 0,
