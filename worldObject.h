@@ -10,6 +10,8 @@
 
 typedef struct
 {
+	GLuint VBO;
+	GLuint VAO;
 	mat4 model;
 	GLfloat* vertices;
 	int vCount; 

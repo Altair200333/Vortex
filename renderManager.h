@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include "baseShader.h"
 #include "worldObject.h"
+#include <GLFW/glfw3.h>
 
 typedef struct
 {

@@ -123,6 +123,7 @@
   <ItemGroup>
     <ClCompile Include="baseShader.c" />
     <ClCompile Include="Player.c" />
+    <ClCompile Include="renderManager.c" />
     <ClCompile Include="start1.c" />
     <ClCompile Include="textType.c" />
     <ClCompile Include="worldObject.c" />

@@ -13,7 +13,8 @@ void RenderText(Shader* shader, char* text, GLfloat x, GLfloat y, GLfloat scale,
 	int counter = 0;
 	while(text[counter]!= '\0')
 	{
-		Character ch = Characters[counter];
+		//printf("%d ", (int)text[counter]);
+		Character ch = Characters[(int)text[counter]];
 
 		GLfloat xpos = x + ch.Bearing[0] * scale;
 		GLfloat ypos = y - (ch.Size[1] - ch.Bearing[1]) * scale;
