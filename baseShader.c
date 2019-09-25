@@ -42,9 +42,9 @@ void useShader(Shader* shader)
 Shader* makeShader(const GLchar* vertexPath, const GLchar* fragmentPath)
 {
 	GLchar* vShaderCode = getShader(vertexPath);
-	printf("%s \n", vShaderCode);
+	//printf("%s \n", vShaderCode);
 	GLchar* fShaderCode = getShader(fragmentPath);
-	printf("%s \n", fShaderCode);
+	//printf("%s \n", fShaderCode);
 
 	//Assemble Vertex Shader
 	GLuint vertexShader;

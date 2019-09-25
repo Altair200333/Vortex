@@ -82,4 +82,9 @@
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="ARIAL.TTF">
+      <Filter>Файлы ресурсов</Filter>
+    </Font>
+  </ItemGroup>
 </Project>

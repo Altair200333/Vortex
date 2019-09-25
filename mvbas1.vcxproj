@@ -145,6 +145,9 @@
     <None Include="textVertexSh.vs" />
     <None Include="vertexSh1.vs" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="ARIAL.TTF" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -21,6 +21,8 @@ bool EdgeViewMode = false;
 Player pl;
 double posX1=-1, posY1=-1;
 float speed = 0.05f;
+
+
 // уда продавать душу за перегрузки и наследование?
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -132,14 +134,85 @@ int main()
 
 	unsigned long counter = 1;
 	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	Shader* shader;
+	shader = makeShader("textVertexSh.vs", "textFragmentSh.fs");
+	mat4 projection = {
+						1, 0, 0, 0,
+						0, 1, 0, 0,
+						0, 0, 1, 0,
+						0, 0, 0, 1
+	};
+	glm_ortho_default((float)(width) / height, projection);
+	
+	useShader(shader);
+	GLint loc = glGetUniformLocation(shader->Program, "projection");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, (float*)(projection));
 
 	if (FT_Init_FreeType(&ft)) {
 		fprintf(stderr, "Could not init freetype library\n");
 	}
-	if (FT_New_Face(ft, "Acme-Regular.ttf", 0, &face)) {
+	if (FT_New_Face(ft, "ARIAL.ttf", 0, &face)) {
 		fprintf(stderr, "Could not open font\n");
 	}
 	FT_Set_Pixel_Sizes(face, 0, 48);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	for (GLubyte c = 0; c < 128; c++)
+	{
+		// Load character glyph 
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+		{
+			printf("ERROR::FREETYTPE: Failed to load Glyph\n");
+			continue;
+		}
+		// Generate texture
+		GLuint texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RED,
+			face->glyph->bitmap.width,
+			face->glyph->bitmap.rows,
+			0,
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			face->glyph->bitmap.buffer
+		);
+
+		printf("%d ", face->glyph->bitmap.width);
+		// Set texture options
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// Now store character for later use
+		Character character = {
+			texture,
+			{face->glyph->bitmap.width, face->glyph->bitmap.rows},
+			{face->glyph->bitmap_left, face->glyph->bitmap_top},
+			face->glyph->advance.x
+		};
+		Characters[(int)c] = character;
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// Destroy FreeType once we're finished
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+
+	glGenVertexArrays(1, &textVAO);
+	glGenBuffers(1, &TextVBO);
+	glBindVertexArray(textVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, TextVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	GLfloat vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -213,8 +286,7 @@ int main()
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	glEnable(GL_DEPTH_TEST);
 
 	Shader* s;
@@ -223,7 +295,6 @@ int main()
 	lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
 
 	
-	//FT_New_Face(ft, "fonts/arial.ttf", 0, &face);
 
 	vec3 cubePositions[] = {
 		{0.0f,  0.0f,  0.0f}, 
@@ -254,14 +325,14 @@ int main()
 		//--DRAW
 		
 		recalculate(&pl);
-
+		
 		glBindVertexArray(containerVAO);
 		useShader(s);
 		setProjectionView(&pl, s);
-
+		
 		setInt(s, "pointLightsCount", 2);
 		setInt(s, "spotLightsCount", 1);
-
+		
 		setVec3(s, "viewPos", pl.eye[0], pl.eye[1], pl.eye[2]);
 		// directional light
 		setVec3(s, "dirLight.direction", -0.2f, -1.0f, -0.3f);
@@ -305,12 +376,12 @@ int main()
 		setFloat(s,"spotLight[0].quadratic", 0.032);
 		setFloat(s,"spotLight[0].cutOff", cos(GLM_PI/180 * 10.5f));
 		setFloat(s,"spotLight[0].outerCutOff", cos(GLM_PI / 180 * 17.0f));
-
+		
 		setVec3(s, "material.ambient", 1.0f, 0.5f, 0.31f);
 		setVec3(s, "material.diffuse", 1.0f, 0.5f, 0.31f);
 		setVec3(s, "material.specular", 0.5f, 0.5f, 0.5f);
 		setFloat(s,"material.shininess", 32.0f);
-
+		
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			
@@ -322,14 +393,14 @@ int main()
 			};
 			
 			glm_translate(model, cubePositions[i]);
-
+		
 			//glm_rotate(model, 3.1415926 / 180 * (float)counter/100, (vec3) { 1.0f-0.1f*i, 0.0f+(float)i*0.1f, 0.0f });
 			float angle = 20.0f * i;
 			GLint modelLoc = glGetUniformLocation(s->Program, "model");
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(model));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
+		
 		useShader(lightShader);
 		setProjectionView(&pl, lightShader);
 		for (unsigned int i = 0; i < 3; i++)
@@ -344,10 +415,14 @@ int main()
 			glm_scale(LightModel, (vec3) { 0.3f, 0.3f, 0.3f });
 			GLint modelLoc = glGetUniformLocation(lightShader->Program, "model");
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(LightModel));
-
+		
 			glBindVertexArray(lightVAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
+		RenderText(shader, "This is sample text", 25.0f, 25.0f, 1.0f, (vec3) { 0.5f, 0.8f, 0.2f });
+		RenderText(shader, "(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, (vec3){ 0.3, 0.7f, 0.9f });
+
 		glBindVertexArray(0);
 
 
