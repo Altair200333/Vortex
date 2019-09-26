@@ -12,11 +12,13 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+//CustomHeaders
 #include "baseShader.h"
 #include "worldObject.h"
 #include "renderManager.h"
 #include "Player.h"
 #include "textType.h"
+#include "lightSource.h"
 
 bool EdgeViewMode = false;
 Player pl;
@@ -45,6 +47,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	
 }
+//move player every frame(calback sucks)
+//TODO use delta time
 void move(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -77,6 +81,7 @@ void move(GLFWwindow* window)
 		translateM(&pl, pl.up, -speed);
 	}
 }
+//drag mouse
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (posX1 == -1 || posX1 == -1)
@@ -97,136 +102,25 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	posY1 = ypos;
 }
 
+int width = 1000, height = 600;
 int main()
 {
-	//Инициализация GLFW
-	glfwInit();
-	//Настройка GLFW
-	//Задается минимальная требуемая версия OpenGL. 
-	//Мажорная 
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	//Минорная
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//Установка профайла для которого создается контекст
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//Выключение возможности изменения размера окна
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
-
-	GLFWwindow* window = glfwCreateWindow(1000, 600, "Matrix..", NULL, NULL);
-	if (window == NULL)
-	{	
-		printf("Failed to create GLFW window \n");
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK)
-	{
-		printf("Failed to initialize GLEW\n");
-		return -1;
-	}
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
-
-	glViewport(0, 0, width, height);
+	GLFWwindow* window = initWindow(width, height);
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
-	
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 	unsigned long counter = 1;
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	
-
-	GLfloat vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-	};
-
-	
-	GLuint VBO, containerVAO;
-	glGenVertexArrays(1, &containerVAO);
-	glGenBuffers(1, &VBO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindVertexArray(containerVAO);
-	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	// Normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glBindVertexArray(0);
-
-
-	GLuint lightVAO;
-	glGenVertexArrays(1, &lightVAO);
-	glBindVertexArray(lightVAO);
-	// We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// Set the vertex attributes (only position data for the lamp))
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-
 	
 	glEnable(GL_DEPTH_TEST);
 
-	Shader* standartShader;
 	standartShader = makeShader("vertexSh1.vs", "fragmentSh.fs");
 	Shader* lightShader;
 	lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
 
-	
+	//fromStlFile("dev.stl");
 
 	vec3 cubePositions[] = {
 		{0.0f,  0.0f,  0.0f}, 
@@ -245,11 +139,38 @@ int main()
 		{2.3f, -3.3f, -4.0f},
 		{-4.0f,  2.0f, -12.0f},
 	};
-	pl = initPlayer(44.9, width, height);
+	pl = initPlayer(45, width, height);
 
 	//glEnable(GL_CULL_FACE);
 	
-	Object* obj;
+	Object obj;
+	obj = generateCube(1);
+	glm_translate(obj.model, cubePositions[9]);
+	rotateAxis(&obj, 45, (vec3) { 1, 0, 0 });
+
+	Object objects[9];
+	for (int i = 0; i < 9; i++)
+	{
+		objects[i] = generateCube(1);
+		glm_translate(objects[i].model, cubePositions[i]);
+	}
+
+	Object lightModels[3];
+	for (int i = 0; i < 3; i++)
+	{
+		lightModels[i] = generateCube(1);
+		glm_translate(lightModels[i].model, pointLightPositions[i]);
+		glm_scale(lightModels[i].model, (vec3) { 0.3, 0.3, 0.3 });
+		setShader(&(lightModels[i]), lightShader);
+	}
+
+	Object plane;
+	plane = generatePlane(1);
+	glm_translate(plane.model, (vec3) { 0, -4.0f, -4 });
+	glm_scale(plane.model, (vec3) { 10.0f, 1.0f, 10.0f });
+	rotateAxis(&plane, 90, (vec3) { 1.0f, 0.0f, 0.0f });
+
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -259,19 +180,19 @@ int main()
 		move(window);
 		recalculate(&pl);
 		
-		glBindVertexArray(containerVAO);
 		useShader(standartShader);
 		setProjectionView(&pl, standartShader);
 		
-		setInt(standartShader, "pointLightsCount", 2);
+		setInt(standartShader, "pointLightsCount", 3);
 		setInt(standartShader, "spotLightsCount", 1);
 		
 		setVec3(standartShader, "viewPos", pl.eye[0], pl.eye[1], pl.eye[2]);
 		// directional light
-		setVec3(standartShader, "dirLight.direction", -0.2f, -1.0f, -0.3f);
+		setVec3(standartShader, "dirLight.direction", -0.2f, -1.0f, -0.5f);
 		setVec3(standartShader, "dirLight.ambient", 0.05f, 0.05f, 0.05f);
 		setVec3(standartShader, "dirLight.diffuse", 0.4f, 0.4f, 0.4f);
 		setVec3(standartShader, "dirLight.specular", 0.5f, 0.5f, 0.5f);
+		setFloat(standartShader, "dirLight.strength", 0.15f);
 		// point light 1
 		setVec3(standartShader,"pointLights[0].position", pointLightPositions[0][0], pointLightPositions[0][1], pointLightPositions[0][2]);
 		setVec3(standartShader,"pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
@@ -283,7 +204,7 @@ int main()
 		// point light 2
 		setVec3(standartShader, "pointLights[1].position", pointLightPositions[1][0], pointLightPositions[1][1], pointLightPositions[1][2]);
 		setVec3(standartShader, "pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-		setVec3(standartShader, "pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+		setVec3(standartShader, "pointLights[1].diffuse", 0.1f, 0.9f, 0.7f);
 		setVec3(standartShader, "pointLights[1].specular", 1.0f, 1.0f, 1.0f);
 		setFloat(standartShader, "pointLights[1].constant", 1.0f);
 		setFloat(standartShader, "pointLights[1].linear", 0.09);
@@ -292,7 +213,7 @@ int main()
 		
 		setVec3(standartShader, "pointLights[2].position", pointLightPositions[2][0], pointLightPositions[2][1], pointLightPositions[2][2]);
 		setVec3(standartShader, "pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-		setVec3(standartShader, "pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+		setVec3(standartShader, "pointLights[2].diffuse", 0.8f, 0.1f, 0.1f);
 		setVec3(standartShader, "pointLights[2].specular", 1.0f, 1.0f, 1.0f);
 		setFloat(standartShader, "pointLights[2].constant", 1.0f);
 		setFloat(standartShader, "pointLights[2].linear", 0.09);
@@ -313,45 +234,25 @@ int main()
 		setVec3(standartShader, "material.ambient", 1.0f, 0.5f, 0.31f);
 		setVec3(standartShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
 		setVec3(standartShader, "material.specular", 0.5f, 0.5f, 0.5f);
-		setFloat(standartShader,"material.shininess", 32.0f);
+		setFloat(standartShader,"material.shininess", 16.0f);
 		
-		for (unsigned int i = 0; i < 10; i++)
+		for (unsigned int i = 0; i < 9; i++)
 		{
-			
-			mat4 model = {
-					1, 0, 0, 0,
-					0, 1, 0, 0,
-					0, 0, 1, 0,
-					0, 0, 0, 1
-			};
-			
-			glm_translate(model, cubePositions[i]);
-		
-			//glm_rotate(model, 3.1415926 / 180 * (float)counter/100, (vec3) { 1.0f-0.1f*i, 0.0f+(float)i*0.1f, 0.0f });
-			float angle = 20.0f * i;
-			GLint modelLoc = glGetUniformLocation(standartShader->Program, "model");
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(model));
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			objects[i].render(&(objects[i]));
+			rotateAxis(&(objects[i]), 0.19f, (vec3) { (i+1)%10, i%10, 0 });
 		}
 		
 		useShader(lightShader);
 		setProjectionView(&pl, lightShader);
 		for (unsigned int i = 0; i < 3; i++)
 		{
-			mat4 LightModel = {
-						1, 0, 0, 0,
-						0, 1, 0, 0,
-						0, 0, 1, 0,
-						0, 0, 0, 1
-			};
-			glm_translate(LightModel, pointLightPositions[i]);
-			glm_scale(LightModel, (vec3) { 0.3f, 0.3f, 0.3f });
-			GLint modelLoc = glGetUniformLocation(lightShader->Program, "model");
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(LightModel));
-		
-			glBindVertexArray(lightVAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			lightModels[i].render(&(lightModels[i]));
 		}
+
+		obj.render(&obj);
+
+		
+		plane.render(&plane);
 
 		glBindVertexArray(0);
 
@@ -360,8 +261,8 @@ int main()
 		//End Draw Calls
 		glfwSwapBuffers(window);
 	}
-	glDeleteVertexArrays(1, &containerVAO);
-	glDeleteBuffers(1, &VBO);
+	//glDeleteVertexArrays(1, &containerVAO);
+	//glDeleteBuffers(1, &VBO);
 	glfwTerminate();
 
 	return 0;

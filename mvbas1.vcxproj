@@ -122,6 +122,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="baseShader.c" />
+    <ClCompile Include="lightSource.c" />
     <ClCompile Include="Player.c" />
     <ClCompile Include="renderManager.c" />
     <ClCompile Include="start1.c" />
@@ -136,12 +137,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="baseShader.h" />
+    <ClInclude Include="lightSource.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="renderManager.h" />
     <ClInclude Include="textType.h" />
     <ClInclude Include="worldObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dev.stl" />
+    <None Include="shadowMappingDepth.fs" />
+    <None Include="shadowMappingDepth.vs" />
     <None Include="textFragmentSh.fs" />
     <None Include="textVertexSh.vs" />
     <None Include="vertexSh1.vs" />
