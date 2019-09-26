@@ -39,6 +39,12 @@
     <ClCompile Include="textType.c">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
+    <ClCompile Include="renderManager.c">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="lightSource.c">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="old1.txt">
@@ -70,6 +76,9 @@
     <ClInclude Include="textType.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="lightSource.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertexSh1.vs">
@@ -81,5 +90,19 @@
     <None Include="textFragmentSh.fs">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
+    <None Include="shadowMappingDepth.vs">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="shadowMappingDepth.fs">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="dev.stl">
+      <Filter>Файлы ресурсов\Models\STL</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="ARIAL.TTF">
+      <Filter>Файлы ресурсов</Filter>
+    </Font>
   </ItemGroup>
 </Project>
