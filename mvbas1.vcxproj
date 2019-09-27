@@ -147,6 +147,9 @@
     <None Include="debug_quad.vs" />
     <None Include="debug_quad_depth.fs" />
     <None Include="dev.stl" />
+    <None Include="point_shadows_depth.fs" />
+    <None Include="point_shadows_depth.gs" />
+    <None Include="point_shadows_depth.vs" />
     <None Include="shadowMappingDepth.fs" />
     <None Include="shadowMappingDepth.vs" />
     <None Include="textFragmentSh.fs" />

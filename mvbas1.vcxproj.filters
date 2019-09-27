@@ -25,6 +25,15 @@
     <Filter Include="Файлы ресурсов\Shaders\debug">
       <UniqueIdentifier>{1bcae6a8-73a1-4732-b65e-9da8ada671c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\Shaders\shadows">
+      <UniqueIdentifier>{da77f768-f8ff-4166-81a0-709401e31fe4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы ресурсов\Shaders\text">
+      <UniqueIdentifier>{28e66460-2ecc-495e-be01-4408a022da9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы ресурсов\Shaders\shadows\pointShadows">
+      <UniqueIdentifier>{98fccd4b-9877-482d-ba44-4c0f69fd46c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="start1.c">
@@ -87,18 +96,6 @@
     <None Include="vertexSh1.vs">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
-    <None Include="textVertexSh.vs">
-      <Filter>Файлы ресурсов\Shaders</Filter>
-    </None>
-    <None Include="textFragmentSh.fs">
-      <Filter>Файлы ресурсов\Shaders</Filter>
-    </None>
-    <None Include="shadowMappingDepth.vs">
-      <Filter>Файлы ресурсов\Shaders</Filter>
-    </None>
-    <None Include="shadowMappingDepth.fs">
-      <Filter>Файлы ресурсов\Shaders</Filter>
-    </None>
     <None Include="dev.stl">
       <Filter>Файлы ресурсов\Models\STL</Filter>
     </None>
@@ -107,6 +104,27 @@
     </None>
     <None Include="debug_quad.vs">
       <Filter>Файлы ресурсов\Shaders\debug</Filter>
+    </None>
+    <None Include="shadowMappingDepth.fs">
+      <Filter>Файлы ресурсов\Shaders\shadows</Filter>
+    </None>
+    <None Include="shadowMappingDepth.vs">
+      <Filter>Файлы ресурсов\Shaders\shadows</Filter>
+    </None>
+    <None Include="textFragmentSh.fs">
+      <Filter>Файлы ресурсов\Shaders\text</Filter>
+    </None>
+    <None Include="textVertexSh.vs">
+      <Filter>Файлы ресурсов\Shaders\text</Filter>
+    </None>
+    <None Include="point_shadows_depth.vs">
+      <Filter>Файлы ресурсов\Shaders\shadows\pointShadows</Filter>
+    </None>
+    <None Include="point_shadows_depth.fs">
+      <Filter>Файлы ресурсов\Shaders\shadows\pointShadows</Filter>
+    </None>
+    <None Include="point_shadows_depth.gs">
+      <Filter>Файлы ресурсов\Shaders\shadows\pointShadows</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

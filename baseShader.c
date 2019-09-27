@@ -39,6 +39,31 @@ void useShader(Shader* shader)
 {
 	glUseProgram(shader->Program);
 }
+void checkCompileErrors(GLuint shader, char* type)
+{
+	GLint success;
+	GLchar infoLog[1024];
+	
+	glGetProgramiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+		printf("ERROR::SHADER_COMPILATION_ERROR of type: %s\n",infoLog);
+	}
+	
+}
+void checkProgrammCompileErrors(GLuint shader, char* type)
+{
+	GLint success;
+	GLchar infoLog[1024];
+
+	glGetProgramiv(shader, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+		printf("ERROR::PROGRAM_LINKING_ERROR of type: %s\n", infoLog);
+	}
+}
 Shader* makeShader(const GLchar* vertexPath, const GLchar* fragmentPath)
 {
 	GLchar* vShaderCode = getShader(vertexPath);
@@ -84,6 +109,46 @@ Shader* makeShader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 	
+	return shader;
+}
+Shader* makeShaderGeometry(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath)
+{
+	GLchar* vShaderCode = getShader(vertexPath);
+	GLchar* fShaderCode = getShader(fragmentPath);
+	GLchar* gShaderCode = getShader(geometryPath);
+									
+	unsigned int vertex, fragment;
+	// vertex shader
+	vertex = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertex, 1, &vShaderCode, NULL);
+	glCompileShader(vertex);
+	checkCompileErrors(vertex, "VERTEX");
+	// fragment Shader
+	fragment = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragment, 1, &fShaderCode, NULL);
+	glCompileShader(fragment);
+	checkCompileErrors(fragment, "FRAGMENT");
+	// if geometry shader is given, compile geometry shader
+	unsigned int geometry;
+	geometry = glCreateShader(GL_GEOMETRY_SHADER);
+	glShaderSource(geometry, 1, &gShaderCode, NULL);
+	glCompileShader(geometry);
+	checkCompileErrors(geometry, "GEOMETRY");
+	
+	// shader Program
+	Shader* shader;
+	shader = (Shader*)malloc(sizeof(Shader));
+	shader->Program = glCreateProgram();
+	glAttachShader(shader->Program, vertex);
+	glAttachShader(shader->Program, fragment);
+	glAttachShader(shader->Program, geometry);
+	glLinkProgram(shader->Program);
+	checkProgrammCompileErrors(shader->Program, "PROGRAM");
+	// delete the shaders as they're linked into our program now and no longer necessery
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
+	glDeleteShader(geometry);
+
 	return shader;
 }
 

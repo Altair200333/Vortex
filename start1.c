@@ -158,8 +158,9 @@ int main()
 	Shader* simpleDepthShader = makeShader("shadowMappingDepth.vs", "shadowMappingDepth.fs");
 	Shader* debugDepthQuad = makeShader("debug_quad.vs", "debug_quad_depth.fs");
 
+	Shader* dps = makeShaderGeometry("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
 	//fromStlFile("dev.stl");
-	vec3 lightPos = { -2.0f, 5.0f, -2.2f };
+	vec3 lightPos = { -2.0f, 5.0f, -3.2f };
 
 	vec3 cubePositions[] = {
 		{0.0f,  0.0f,  0.0f}, 
@@ -255,6 +256,7 @@ int main()
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	useShader(standartShader);
 	setInt(setInt, "shadowMap", 0);
 	useShader(debugDepthQuad);
