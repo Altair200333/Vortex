@@ -68,6 +68,16 @@ void renderObjectCustom(Object* obj)
 
 	renderVAO(obj);
 }
+void renderObjectSpecificShader(Object* obj, Shader* sh)
+{
+	useShader(sh);
+
+	GLint modelLoc = glGetUniformLocation(sh->Program, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(obj->model));
+
+	renderVAO(obj);
+}
+
 int currentPointLightId = 0;
 int currentSpotLightId = 0;
 void renderDirectionalLight(Shader* sh, LightSource* ls) 

@@ -22,6 +22,9 @@
     <Filter Include="Файлы ресурсов\Models\STL">
       <UniqueIdentifier>{f2036b84-6e19-4448-a4cd-7eaadec42e53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\Shaders\debug">
+      <UniqueIdentifier>{1bcae6a8-73a1-4732-b65e-9da8ada671c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="start1.c">
@@ -98,6 +101,12 @@
     </None>
     <None Include="dev.stl">
       <Filter>Файлы ресурсов\Models\STL</Filter>
+    </None>
+    <None Include="debug_quad_depth.fs">
+      <Filter>Файлы ресурсов\Shaders\debug</Filter>
+    </None>
+    <None Include="debug_quad.vs">
+      <Filter>Файлы ресурсов\Shaders\debug</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

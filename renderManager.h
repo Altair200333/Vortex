@@ -13,6 +13,7 @@ Shader* standartShader;
 GLFWwindow* initWindow(int w, int h);
 void renderObjectStandart(Object* obj);
 void renderObjectCustom(Object* obj);
+void renderObjectSpecificShader(Object* obj, Shader* sh);
 void renderDirectionalLight(Shader* sh, struct LightSource* ls);
 void renderPointLight(Shader* sh, struct LightSource* ls);
 void renderSpotLight(Shader* sh, struct LightSource* ls);

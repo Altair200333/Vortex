@@ -144,6 +144,8 @@
     <ClInclude Include="worldObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="debug_quad.vs" />
+    <None Include="debug_quad_depth.fs" />
     <None Include="dev.stl" />
     <None Include="shadowMappingDepth.fs" />
     <None Include="shadowMappingDepth.vs" />
