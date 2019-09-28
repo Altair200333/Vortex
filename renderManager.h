@@ -8,6 +8,8 @@
 #include <GLFW/glfw3.h>
 #include "lightSource.h"
 
+static unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
 Shader* standartShader;
 
 GLFWwindow* initWindow(int w, int h);
@@ -19,4 +21,8 @@ void renderPointLight(Shader* sh, struct LightSource* ls);
 void renderSpotLight(Shader* sh, struct LightSource* ls);
 
 void renderLights(Shader* sh, struct LightSource** ls, int size);
+
+void recalculateShadows(Shader* s, struct LightSource* ls, Object* objects);
+void renderScene(Shader* shader, Object* objects);
+
 #endif

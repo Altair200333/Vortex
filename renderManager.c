@@ -1,7 +1,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "renderManager.h"
 #include <string.h>
-
+#include <cglm/cglm.h>
+#include <cglm/mat4.h>
+#include <cglm/types.h>
 GLFWwindow* initWindow(int width, int height)
 {
 	//Инициализация GLFW
@@ -89,6 +91,11 @@ void renderDirectionalLight(Shader* sh, LightSource* ls)
 	setVec3(sh, "dirLight.specular", (dr->specular)[0], (dr->specular)[1], (dr->specular)[2]);
 	setFloat(sh, "dirLight.strength", dr->strength);
 }
+
+//Ну давай, скажи как плох этот код. На С++ и тем более Java написал бы по-человечески
+//Тут как бы по большей части специфичный код, вставить туда, вотнкуть сюда, + строки - больно с ними в С(ну или я не оч умею)
+
+//Set this light data to shader, recalculate light affect
 void renderPointLight(Shader* sh, LightSource* ls) 
 {
 	PointLight* pl = (PointLight*)(ls->lightSrc);
@@ -158,6 +165,7 @@ void renderSpotLight(Shader* sh, LightSource* ls)
 	currentSpotLightId++;
 }
 
+//Proceed all lights in scene(no shadows, only "transform" params)
 void renderLights(Shader* sh, LightSource** ls, int size)
 {
 	for (int i = 0; i < size; i++)
@@ -169,4 +177,57 @@ void renderLights(Shader* sh, LightSource** ls, int size)
 
 	currentPointLightId = 0;
 	currentSpotLightId = 0;
+}
+
+//ща будет минутка нерешительности как правильно сделать, чтоб оптимальней и не коряво
+
+//Recalculate lighting for single light Source
+//Set shadow map/cubemap data to shader
+//.. Actually renders scene from light's perspective
+void recalculateShadows(Shader* s, LightSource* ls, Object* objects)
+{
+	PointLight* pl = (PointLight*)(ls->lightSrc);
+
+	float near_plane = 1.0f;
+	float far_plane = 45.0f;
+	mat4 shadowProj;
+	glm_perspective(GLM_PI / 180.0f * 90, (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane, shadowProj);
+	mat4 shadowTransforms[6];
+	mat4 tmp, tmp3;
+	vec3 tmp2;
+	vec3 lightPos = { (pl->position)[0], pl->position[1], pl->position[2] };
+	glm_vec3_add(lightPos,
+		(vec3) { 1.0f, 0.0f, 0.0f }, tmp2);
+	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
+	glm_mat4_mul(shadowProj, tmp, shadowTransforms[0]);
+
+	glm_vec3_add(lightPos, (vec3) { -1.0f, 0.0f, 0.0f }, tmp2);
+	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
+	glm_mat4_mul(shadowProj, tmp, shadowTransforms[1]);
+
+	glm_vec3_add(lightPos, (vec3) { 0.0f, 1.0f, 0.0f }, tmp2);
+	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, 0.0f, 1.0f }, tmp);
+	glm_mat4_mul(shadowProj, tmp, shadowTransforms[2]);
+
+	glm_vec3_add(lightPos, (vec3) { 0.0f, -1.0f, 0.0f }, tmp2);
+	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, 0.0f, -1.0f }, tmp);
+	glm_mat4_mul(shadowProj, tmp, shadowTransforms[3]);
+
+	glm_vec3_add(lightPos, (vec3) { 0.0f, 0.0f, 1.0f }, tmp2);
+	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
+	glm_mat4_mul(shadowProj, tmp, shadowTransforms[4]);
+
+	glm_vec3_add(lightPos, (vec3) { 0.0f, 0.0f, -1.0f }, tmp2);
+	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
+	glm_mat4_mul(shadowProj, tmp, shadowTransforms[5]);
+
+
+}
+void renderScene(Shader* shader, Object* objects)
+{
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		renderObjectSpecificShader(&(objects[i]), shader);
+		//rotateAxis(&(objects[i]), 0.19f, (vec3) { (i+1)%10, i%10, 0 });
+	}
 }

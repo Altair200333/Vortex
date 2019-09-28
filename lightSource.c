@@ -18,8 +18,7 @@ void initLight(LightSource* src)
 }
 
 //Екарынй бабай этого C
-//Больше маллоков богу маллоков
-//Маллок вернул NULL, да здравствует новый malloc
+//Больше маллоков богу маллоков, ибо нефиг структуры терять
 
 //Generate light source and sign it as dirrectional light
 //Returns pointer to LightSource struct
