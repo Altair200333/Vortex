@@ -12,7 +12,7 @@ If you just want to copy find some GLSL code you are welcome to fragmentSh.fs fi
 -(Process)R/B physics  
 
 
-Also Very usefull resource is [Link](learnopengl.com)
+Also Very usefull resource is [Link](https://learnopengl.com/)
 
 ------------
 Actually, what are you doing here?
