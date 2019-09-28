@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h>
 #include "lightSource.h"
 
-static unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+static unsigned int SHADOW_WIDTH = 512, SHADOW_HEIGHT = 512;
 
 Shader* standartShader;
 

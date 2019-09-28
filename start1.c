@@ -157,8 +157,6 @@ int main()
 	standartShader = makeShader("vertexSh1.vs", "fragmentSh.fs");
 	Shader* lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
 
-	Shader* debugDepthQuad = makeShader("debug_quad.vs", "debug_quad_depth.fs");
-
 	Shader* simpleDepthShader = makeShaderGeometry("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
 	//fromStlFile("dev.stl");
 	vec3 lightPos = { -2.0f, 4.0f, -3.2f };
@@ -218,8 +216,8 @@ int main()
 		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f }, (vec3){ 0.5f, 0.5f, 0.5f }, 0.85f);
 	PointLight pli = { {lightPos[0], lightPos[1], lightPos[2]}, 1.0f, 0.09, 0.032,
 	{0.05f, 0.05f, 0.05f}, {0.8f, 0.8f, 0.8f}, {1.0f, 1.0f, 1.0f}};
-	LightSource ps = { TYPE_POINT_LIGHT, &pli };
-	initLight(&ps);
+	LightSource* ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 1.0f, 0.09, 0.032,
+		(vec3) { 0.05f, 0.05f, 0.05f }, (vec3) { 0.8f, 0.8f, 0.8f }, (vec3) { 1.0f, 1.0f, 1.0f });
 
 	SpotLight sli = { 
 	{0, 2, -4},
@@ -233,7 +231,7 @@ int main()
 	LightSource sps = { TYPE_SPOT_LIGHT, &sli };
 	initLight(&sps);
 
-	LightSource lights[] = {&ps};
+	LightSource lights[] = {ps};
 
 	// configure depth map FBO
 	// -----------------------
@@ -262,8 +260,7 @@ int main()
 	setInt(setInt, "shadowMap", 0);
 	useShader(simpleDepthShader);
 	setInt(simpleDepthShader, "depthMap", 1);
-	useShader(debugDepthQuad);
-	setInt(debugDepthQuad, "depthMap", 0);
+	
 
 	float near_plane = 1.0f;
 	float far_plane = 45.0f;
@@ -306,25 +303,9 @@ int main()
 		move(window);
 		recalculate(&pl);
 		
-
 		//----------------
 		//================= RENDER TO BUF
-		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
-
-		useShader(simpleDepthShader);
-		for (unsigned int i = 0; i < 6; ++i)
-		{
-			char base[40];
-			snprintf(base, 40, "shadowMatrices[%d]", i);
-			setMat4(simpleDepthShader, base, (float*)(shadowTransforms[i]));
-		}
-		setFloat(simpleDepthShader, "far_plane", far_plane);
-		setVec3(simpleDepthShader, "lightPos", lightPos[0], lightPos[1], lightPos[2]);
-		renderScene(simpleDepthShader, objects);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		recalculateShadows(simpleDepthShader, ps, objects);
 		// reset viewport
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -334,12 +315,17 @@ int main()
 		useShader(standartShader);
 		setProjectionView(&pl, standartShader);
 		
+		((PointLight*)(ps->lightSrc))->position[0] += 0.001;
+		glm_translate(lightModels[0].model, (vec3) { -0.001, 0, 0 });
 		setVec3( standartShader, "viewPos", pl.eye[0], pl.eye[1], pl.eye[2]);
-		setVec3( standartShader, "lightPos", lightPos[0], lightPos[1], lightPos[2]);
+		setVec3( standartShader, "lightPos", 
+			((PointLight*)(ps->lightSrc))->position[0],
+			((PointLight*)(ps->lightSrc))->position[1],
+			((PointLight*)(ps->lightSrc))->position[2]);
 		setFloat(standartShader, "far_plane", far_plane);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 		renderLights(standartShader, lights, 1);
 		
 		setVec3(standartShader, "material.ambient", 1.0f, 0.5f, 0.31f);

@@ -186,42 +186,32 @@ void renderLights(Shader* sh, LightSource** ls, int size)
 //.. Actually renders scene from light's perspective
 void recalculateShadows(Shader* s, LightSource* ls, Object* objects)
 {
+	// configure depth map FBO
+	// -----------------------
 	PointLight* pl = (PointLight*)(ls->lightSrc);
 
-	float near_plane = 1.0f;
-	float far_plane = 45.0f;
-	mat4 shadowProj;
-	glm_perspective(GLM_PI / 180.0f * 90, (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane, shadowProj);
-	mat4 shadowTransforms[6];
-	mat4 tmp, tmp3;
-	vec3 tmp2;
-	vec3 lightPos = { (pl->position)[0], pl->position[1], pl->position[2] };
-	glm_vec3_add(lightPos,
-		(vec3) { 1.0f, 0.0f, 0.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[0]);
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, pl->shadowData.depthMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
-	glm_vec3_add(lightPos, (vec3) { -1.0f, 0.0f, 0.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[1]);
+	useShader(s);
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		char base[40];
+		snprintf(base, 40, "shadowMatrices[%d]", i);
+		setMat4(s, base, (float*)(pl->shadowData.shadowTransforms[i]));
+	}
+	setFloat(s, "far_plane", far_plane);
+	setVec3(s, "lightPos", pl->position[0], pl->position[1], pl->position[2]);
+	renderScene(s, objects);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm_vec3_add(lightPos, (vec3) { 0.0f, 1.0f, 0.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, 0.0f, 1.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[2]);
+	glViewport(0, 0, 1280, 720);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glm_vec3_add(lightPos, (vec3) { 0.0f, -1.0f, 0.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, 0.0f, -1.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[3]);
-
-	glm_vec3_add(lightPos, (vec3) { 0.0f, 0.0f, 1.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[4]);
-
-	glm_vec3_add(lightPos, (vec3) { 0.0f, 0.0f, -1.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[5]);
-
-
+	useShader(standartShader);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, pl->shadowData.depthCubemap);
 }
 void renderScene(Shader* shader, Object* objects)
 {
