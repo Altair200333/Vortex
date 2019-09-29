@@ -4,6 +4,7 @@
 #include <cglm/cglm.h>
 #include <cglm/mat4.h>
 #include <cglm/types.h>
+
 GLFWwindow* initWindow(int width, int height)
 {
 	//Инициализация GLFW
@@ -189,29 +190,32 @@ void recalculateShadows(Shader* s, LightSource* ls, Object* objects)
 	// configure depth map FBO
 	// -----------------------
 	PointLight* pl = (PointLight*)(ls->lightSrc);
-
+	bindShadowTransform(pl);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, pl->shadowData.depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	useShader(s);
+	useShader(simpleDepthShader);
 	for (unsigned int i = 0; i < 6; ++i)
 	{
 		char base[40];
 		snprintf(base, 40, "shadowMatrices[%d]", i);
-		setMat4(s, base, (float*)(pl->shadowData.shadowTransforms[i]));
+		setMat4(simpleDepthShader, base, (float*)(pl->shadowData.shadowTransforms[i]));
 	}
-	setFloat(s, "far_plane", far_plane);
-	setVec3(s, "lightPos", pl->position[0], pl->position[1], pl->position[2]);
-	renderScene(s, objects);
+	setFloat(simpleDepthShader, "far_plane", far_plane);
+	setVec3(simpleDepthShader, "lightPos", pl->position[0], pl->position[1], pl->position[2]);
+	renderScene(simpleDepthShader, objects);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glViewport(0, 0, 1280, 720);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	useShader(standartShader);
+	useShader(s);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, pl->shadowData.depthCubemap);
+
+	glViewport(0, 0, windowWidth, windowHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void renderScene(Shader* shader, Object* objects)
 {

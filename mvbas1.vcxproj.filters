@@ -126,6 +126,12 @@
     <None Include="point_shadows_depth.gs">
       <Filter>Файлы ресурсов\Shaders\shadows\pointShadows</Filter>
     </None>
+    <None Include="sps.stl">
+      <Filter>Файлы ресурсов\Models\STL</Filter>
+    </None>
+    <None Include="car.stl">
+      <Filter>Файлы ресурсов\Models\STL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="ARIAL.TTF">

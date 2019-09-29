@@ -144,6 +144,7 @@
     <ClInclude Include="worldObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="car.stl" />
     <None Include="debug_quad.vs" />
     <None Include="debug_quad_depth.fs" />
     <None Include="dev.stl" />
@@ -152,6 +153,7 @@
     <None Include="point_shadows_depth.vs" />
     <None Include="shadowMappingDepth.fs" />
     <None Include="shadowMappingDepth.vs" />
+    <None Include="sps.stl" />
     <None Include="textFragmentSh.fs" />
     <None Include="textVertexSh.vs" />
     <None Include="vertexSh1.vs" />

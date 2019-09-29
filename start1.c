@@ -1,4 +1,5 @@
 #define GLEW_STATIC
+#define _CRT_SECURE_NO_WARNINGS
 #include <GL/glew.h>
 // GLFW
 #include <GLFW/glfw3.h>
@@ -23,9 +24,10 @@
 bool EdgeViewMode = false;
 Player pl;
 double posX1=-1, posY1=-1;
-float speed = 0.006f;
+float Fspeed = 5;
 
-
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 // уда продавать душу за перегрузки и наследование?
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -51,6 +53,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 //TODO use delta time
 void move(GLFWwindow* window)
 {
+	float speed = Fspeed * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		translateM(&pl, pl.dir, speed);
@@ -138,10 +141,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 
-int width = 1280, height = 720;
 int main()
 {
-	GLFWwindow* window = initWindow(width, height);
+	GLFWwindow* window = initWindow(windowWidth, windowHeight);
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -157,9 +159,10 @@ int main()
 	standartShader = makeShader("vertexSh1.vs", "fragmentSh.fs");
 	Shader* lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
 
-	Shader* simpleDepthShader = makeShaderGeometry("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
+	simpleDepthShader = makeShaderGeometry("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
+
 	//fromStlFile("dev.stl");
-	vec3 lightPos = { -2.0f, 4.0f, -3.2f };
+	vec3 lightPos = { -6.0f, 4.0f, -3.2f };
 
 	vec3 cubePositions[] = {
 		{0.0f,  0.0f,  0.0f}, 
@@ -178,7 +181,7 @@ int main()
 		{2.3f, -3.3f, -4.0f},
 		{-4.0f,  2.0f, -12.0f},
 	};
-	pl = initPlayer(45, width, height);
+	pl = initPlayer(45, windowWidth, windowHeight);
 
 	//glEnable(GL_CULL_FACE);
 	
@@ -206,18 +209,31 @@ int main()
 	Object plane;
 	plane = generatePlane(1);
 	glm_translate(plane.model, (vec3) { 2, -4.0f, -2 });
-	glm_scale(plane.model, (vec3) { 10.0f, 1.0f, 10.0f });
+	glm_scale(plane.model, (vec3) { 200.0f, 1.0f, 200.0f });
 	rotateAxis(&plane, 90, (vec3) { 1.0f, 0.0f, 0.0f });
-
+	
+	Object oo = fromStlFile("dev.stl");
+	Object oo2 = fromStlFile("car.stl");
+	glm_translate(oo2.model, (vec3) { -8, -2.9, -7 });
+	//glm_scale(oo2.model, (vec3) { 0.2, 0.2, 0.2 });
+	//glm_rotate(oo2.model, 3.1415 / 180 * 90, (vec3) { 1, 0, 0 });
+	objects[0] = oo2;
+	objects[1] = oo;
 	objects[9] = plane;
 	
 	LightSource* ls = generateDirectionalLight(
 		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
 		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f }, (vec3){ 0.5f, 0.5f, 0.5f }, 0.85f);
-	PointLight pli = { {lightPos[0], lightPos[1], lightPos[2]}, 1.0f, 0.09, 0.032,
-	{0.05f, 0.05f, 0.05f}, {0.8f, 0.8f, 0.8f}, {1.0f, 1.0f, 1.0f}};
+	
 	LightSource* ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 1.0f, 0.09, 0.032,
 		(vec3) { 0.05f, 0.05f, 0.05f }, (vec3) { 0.8f, 0.8f, 0.8f }, (vec3) { 1.0f, 1.0f, 1.0f });
+
+	LightSource* ps2 = generatePointLight((vec3) { pointLightPositions[1][0],
+		pointLightPositions[1][1],
+		pointLightPositions[1][2] }, 1.0f, 0.09, 0.032,
+		(vec3) {0.05f, 0.05f, 0.05f}, 
+		(vec3) { 0.8f, 0.8f, 0.8f },
+		(vec3) { 1.0f, 1.0f, 1.0f });
 
 	SpotLight sli = { 
 	{0, 2, -4},
@@ -231,7 +247,7 @@ int main()
 	LightSource sps = { TYPE_SPOT_LIGHT, &sli };
 	initLight(&sps);
 
-	LightSource lights[] = {ps};
+	LightSource lights[] = {ps, ps2};
 
 	// configure depth map FBO
 	// -----------------------
@@ -255,47 +271,19 @@ int main()
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
 	useShader(standartShader);
-	setInt(setInt, "shadowMap", 0);
+	setInt(standartShader, "shadowMap", 0);
 	useShader(simpleDepthShader);
 	setInt(simpleDepthShader, "depthMap", 1);
 	
-
-	float near_plane = 1.0f;
-	float far_plane = 45.0f;
-	mat4 shadowProj;
-	glm_perspective(GLM_PI/180.0f*90, (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane, shadowProj);
-	mat4 shadowTransforms[6];
-	mat4 tmp, tmp3;
-	vec3 tmp2;
-	glm_vec3_add(lightPos, (vec3) { 1.0f, 0.0f, 0.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[0]);
-
-	glm_vec3_add(lightPos, (vec3) { -1.0f, 0.0f, 0.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[1]);
-
-	glm_vec3_add(lightPos, (vec3) { 0.0f, 1.0f, 0.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, 0.0f, 1.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[2]);
-
-	glm_vec3_add(lightPos, (vec3) { 0.0f, -1.0f, 0.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, 0.0f, -1.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[3]);
-
-	glm_vec3_add(lightPos, (vec3) { 0.0f, 0.0f, 1.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[4]);
-
-	glm_vec3_add(lightPos, (vec3) { 0.0f, 0.0f, -1.0f }, tmp2);
-	glm_lookat(lightPos, tmp2, (vec3) { 0.0f, -1.0f, 0.0f }, tmp);
-	glm_mat4_mul(shadowProj, tmp, shadowTransforms[5]);
-
-
 	while (!glfwWindowShouldClose(window))
 	{
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+		
+		//printf("%f\n", deltaTime);
+		
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -304,19 +292,15 @@ int main()
 		recalculate(&pl);
 		
 		//----------------
-		//================= RENDER TO BUF
-		recalculateShadows(simpleDepthShader, ps, objects);
-		// reset viewport
-		glViewport(0, 0, width, height);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//---------
-		//===========
-		//RENDER NORMAL SENE
+		//================= Calc shadows
+		
+		recalculateShadows(standartShader, ps, objects);
+		
 		useShader(standartShader);
 		setProjectionView(&pl, standartShader);
 		
-		((PointLight*)(ps->lightSrc))->position[0] += 0.001;
-		glm_translate(lightModels[0].model, (vec3) { -0.001, 0, 0 });
+		//((PointLight*)(ps->lightSrc))->position[0] += 0.002;
+		//glm_translate(lightModels[0].model, (vec3) { 0.001, 0, 0 });
 		setVec3( standartShader, "viewPos", pl.eye[0], pl.eye[1], pl.eye[2]);
 		setVec3( standartShader, "lightPos", 
 			((PointLight*)(ps->lightSrc))->position[0],
@@ -326,7 +310,7 @@ int main()
 
 		//glActiveTexture(GL_TEXTURE0);
 		//glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-		renderLights(standartShader, lights, 1);
+		renderLights(standartShader, lights, 2);
 		
 		setVec3(standartShader, "material.ambient", 1.0f, 0.5f, 0.31f);
 		setVec3(standartShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
@@ -336,12 +320,13 @@ int main()
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			objects[i].render(&(objects[i]));
-			//rotateAxis(&(objects[i]), 0.19f, (vec3) { (i+1)%10, i%10, 0 });
+			if(i<9)
+			rotateAxis(&(objects[i]), 0.1f*i, (vec3) { (i+1)%10, i%10, 0 });
 		}
 		
 		useShader(lightShader);
 		setProjectionView(&pl, lightShader);
-		for (unsigned int i = 0; i < 1; i++)
+		for (unsigned int i = 0; i < 2; i++)
 		{
 			lightModels[i].render(&(lightModels[i]));
 		}

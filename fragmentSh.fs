@@ -63,7 +63,6 @@ uniform vec3 lightPos;
 uniform samplerCube depthMap;
 
 uniform float far_plane;
-uniform bool shadows;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -147,8 +146,10 @@ float CubeShadowCalculation(vec3 fragPos)
         // }
     // }
     // shadow /= (samples * samples * samples);
+    vec3 norm = normalize(Normal);
+
     float shadow = 0.0;
-    float bias = 0.15;
+    float bias = 0.35;
     int samples = 20;
     float viewDistance = length(viewPos - fragPos);
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
@@ -160,7 +161,11 @@ float CubeShadowCalculation(vec3 fragPos)
             shadow += 1.0;
     }
     shadow /= float(samples);
-        
+    vec3 fl = normalize(fragToLight);    
+    if(dot(norm, -fl)<0.15)
+    {
+        shadow = 0;
+    }
     // display closestDepth as debug (to visualize depth cubemap)
     // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
         
@@ -216,7 +221,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     //vec3 reflectDir = reflect(-lightDir, normal);
 	//vec3 halfwayDir = normalize(lightDir + viewDir);  
 	vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     //float spec = pow(max(dot(viewDir, halfwayDir), 0.0), material.shininess);
     // attenuation
     float distance = length(light.position - fragPos);
@@ -227,7 +232,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     vec3 specular = light.specular * spec * material.specular;
     ambient *= attenuation;
     diffuse *= attenuation;
-    specular *= attenuation*0.3;
+    specular *= attenuation*0.6;
     vec3 result = (diffuse + specular);
 	return result;
 }

@@ -8,9 +8,13 @@
 #include <GLFW/glfw3.h>
 #include "lightSource.h"
 
+static int windowWidth = 1280, windowHeight = 720;
+
 static unsigned int SHADOW_WIDTH = 512, SHADOW_HEIGHT = 512;
 
 Shader* standartShader;
+Shader* simpleDepthShader;
+
 
 GLFWwindow* initWindow(int w, int h);
 void renderObjectStandart(Object* obj);

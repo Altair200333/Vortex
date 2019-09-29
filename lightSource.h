@@ -70,5 +70,7 @@ void initLight(LightSource* src);
 LightSource* generateDirectionalLight(vec3 direction, vec3 ambient, vec3 diffuse, vec3 specular, float strength);
 LightSource* generatePointLight(vec3 position, float constant,float linear,
 float quadratic, vec3 ambient, vec3 diffuse, vec3 specular);
+void bindShadowTransform(PointLight* pl);
+
 
 #endif
