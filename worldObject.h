@@ -17,6 +17,7 @@ typedef struct
 	GLfloat* vertices;
 	int vCount; 
 	Shader* shader;
+	vec3 color;
 	void(*render)(Object);
 }Object;
 

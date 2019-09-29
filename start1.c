@@ -233,7 +233,8 @@ int main()
 	
 	LightSource* ls = generateDirectionalLight(
 		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
-		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f }, (vec3){ 0.5f, 0.5f, 0.5f }, 0.85f);
+		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f },
+		(vec3){ 0.5f, 0.5f, 0.5f }, 0.001f);
 	
 	LightSource* ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 
 		1.0f, 0.09, 0.032,
@@ -269,7 +270,7 @@ int main()
 	LightSource sps = { TYPE_SPOT_LIGHT, &sli };
 	initLight(&sps);
 
-	LightSource lights[] = {ps, ps2, ps3};
+	LightSource lights[] = {ls,ps, ps2, ps3};
 
 	
 
@@ -293,7 +294,7 @@ int main()
 		
 		//----------------
 		//================= Calc shadows
-		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 0.01,
+		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 1*deltaTime,
 			(vec3) { 0, 1, 0 });
 		setPos(&(lightModels[0]), ((PointLight*)(ps->lightSrc))->position);
 		//((PointLight*)(ps3->lightSrc))->position[0] += 1*deltaTime;
@@ -331,10 +332,9 @@ int main()
 
 		//glActiveTexture(GL_TEXTURE0);
 		//glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-		renderLights(standartShader, lights, 3);
+		renderLights(standartShader, lights, 4);
 		
 		setVec3(standartShader, "material.ambient", 1.0f, 0.5f, 0.31f);
-		setVec3(standartShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
 		setVec3(standartShader, "material.specular", 0.5f, 0.5f, 0.5f);
 		setFloat(standartShader,"material.shininess", 16.0f);
 		

@@ -147,10 +147,10 @@ float CubeShadowCalculation(vec3 fragPos)
     // }
     // shadow /= (samples * samples * samples);
     vec3 norm = normalize(Normal);
-
+    vec3 a = normalize(fragToLight);
     float shadow = 0.0;
-    float bias = 0.35;
-    int samples = 20;
+    float bias = max(0.05 * (1.0 - dot(norm, a)), 0.005);
+    int samples = 40;
     float viewDistance = length(viewPos - fragPos);
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
     for(int i = 0; i < samples; ++i)
@@ -166,6 +166,13 @@ float CubeShadowCalculation(vec3 fragPos)
     {
         shadow = 0;
     }
+    float l = length(fragToLight);
+    if(l>45)
+    {
+        shadow /=l*2;
+    }
+    if(shadow<0.3)
+        shadow = 0;
     // display closestDepth as debug (to visualize depth cubemap)
     // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
         

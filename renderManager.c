@@ -56,7 +56,8 @@ void renderVAO(Object* obj)
 void renderObjectStandart(Object* obj)
 {
 	useShader(standartShader);
-
+	setVec3(standartShader, "material.diffuse",
+		obj->color[0], obj->color[1], obj->color[2]);
 	GLint modelLoc = glGetUniformLocation(standartShader->Program, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(obj->model));
 
@@ -65,6 +66,8 @@ void renderObjectStandart(Object* obj)
 void renderObjectCustom(Object* obj)
 {
 	useShader(obj->shader);
+	setVec3(obj->shader, "material.diffuse", 
+		obj->color[0], obj->color[1], obj->color[2]);
 
 	GLint modelLoc = glGetUniformLocation(obj->shader->Program, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float*)(obj->model));

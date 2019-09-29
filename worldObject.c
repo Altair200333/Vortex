@@ -60,7 +60,8 @@ Object generateCube(float scale)
 	Object obj = {0,0, {  1, 0, 0, 0,
 					0, 1, 0, 0,
 					0, 0, 1, 0,
-					0, 0, 0, 1 }, {0,0,0}, vert, 36, NULL };
+					0, 0, 0, 1 }, {0,0,0}, vert, 36, NULL,
+		{1.0f, 0.5f, 0.31f} };
 
 	glGenVertexArrays(1, &obj.VAO);
 	glGenBuffers(1, &obj.VBO);
@@ -115,7 +116,8 @@ Object generatePlane(float scale)
 					1, 0, 0, 0,
 					0, 1, 0, 0,
 					0, 0, 1, 0,
-					0, 0, 0, 1 }, {0,0,0}, vert, 6, NULL };
+					0, 0, 0, 1 }, {0,0,0}, vert, 6, NULL ,
+		{1.0f, 0.5f, 0.31f}};
 
 	glGenVertexArrays(1, &obj.VAO);
 	glGenBuffers(1, &obj.VBO);
@@ -131,7 +133,7 @@ Object generatePlane(float scale)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 	glBindVertexArray(0);
-
+	
 	obj.render = &renderObjectStandart;
 	return obj;
 }
@@ -242,7 +244,9 @@ Object fromStlFile(char* name)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 	glBindVertexArray(0);
-
+	obj.color[0] = 0.7f;
+	obj.color[1] = 0.5f;
+	obj.color[2]= 0.61f;
 	obj.render = &renderObjectStandart;
 	return obj;
 }
