@@ -219,7 +219,7 @@ void recalculateShadows(Shader* s, LightSource* ls, Object* objects)
 }
 void renderScene(Shader* shader, Object* objects)
 {
-	for (unsigned int i = 0; i < 10; i++)
+	for (unsigned int i = 0; i < 12; i++)
 	{
 		renderObjectSpecificShader(&(objects[i]), shader);
 		//rotateAxis(&(objects[i]), 0.19f, (vec3) { (i+1)%10, i%10, 0 });

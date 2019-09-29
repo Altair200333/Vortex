@@ -25,4 +25,5 @@ Object generateCube(float scale);
 Object generatePlane(float scale);
 Object fromStlFile(char* name);
 void rotateAxis(Object* obj, float angle, vec3 axis);
+void setPos(Object* obj, vec3 axis);
 #endif

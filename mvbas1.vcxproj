@@ -144,6 +144,8 @@
     <ClInclude Include="worldObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="build.stl" />
+    <None Include="cage.stl" />
     <None Include="car.stl" />
     <None Include="debug_quad.vs" />
     <None Include="debug_quad_depth.fs" />

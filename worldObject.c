@@ -52,7 +52,10 @@ Object generateCube(float scale)
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
 
-	
+	for(int i=0;i<36*6;i++)
+	{
+		vert[i] *= scale;
+	}
 
 	Object obj = {0,0, {  1, 0, 0, 0,
 					0, 1, 0, 0,
@@ -242,4 +245,17 @@ Object fromStlFile(char* name)
 
 	obj.render = &renderObjectStandart;
 	return obj;
+}
+void setPos(Object* obj, vec3 axis)
+{
+	glm_translate(obj->model, 
+		(vec3) {-obj->location[0],-obj->location[1], -obj->location[2]});
+
+	glm_translate(obj->model,
+		(vec3) {
+		axis[0], axis[1], axis[2]
+	});
+	obj->location[0] = axis[0];
+	obj->location[1] = axis[1];
+	obj->location[2] = axis[2];
 }

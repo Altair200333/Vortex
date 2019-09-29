@@ -62,6 +62,10 @@ void initShadowProperties(LightSource* src)
 	bindShadowTransform(pl);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, pl->shadowData.depthMapFBO);
+	useShader(standartShader);
+	setInt(standartShader, "shadowMap", 0);
+	useShader(simpleDepthShader);
+	setInt(simpleDepthShader, "depthMap", 1);
 }
 void initLight(LightSource* src)
 {

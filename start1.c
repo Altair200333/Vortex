@@ -179,7 +179,7 @@ int main()
 	vec3 pointLightPositions[] = {
 		{lightPos[0], lightPos[1], lightPos[2]},
 		{2.3f, -3.3f, -4.0f},
-		{-4.0f,  2.0f, -12.0f},
+		{-4.0f,  6.0f, -12.0f},
 	};
 	pl = initPlayer(45, windowWidth, windowHeight);
 
@@ -190,7 +190,7 @@ int main()
 	glm_translate(obj.model, cubePositions[9]);
 	rotateAxis(&obj, 45, (vec3) { 1, 0, 0 });
 
-	Object objects[10];
+	Object objects[12];
 	for (int i = 0; i < 9; i++)
 	{
 		objects[i] = generateCube(1);
@@ -200,9 +200,9 @@ int main()
 	Object lightModels[3];
 	for (int i = 0; i < 3; i++)
 	{
-		lightModels[i] = generateCube(1);
-		glm_translate(lightModels[i].model, pointLightPositions[i]);
-		glm_scale(lightModels[i].model, (vec3) { 0.3, 0.3, 0.3 });
+		lightModels[i] = generateCube(0.3f);
+		setPos(&(lightModels[i]), pointLightPositions[i]);
+		//glm_scale(lightModels[i].model, (vec3) { 0.3, 0.3, 0.3 });
 		setShader(&(lightModels[i]), lightShader);
 	}
 
@@ -213,20 +213,33 @@ int main()
 	rotateAxis(&plane, 90, (vec3) { 1.0f, 0.0f, 0.0f });
 	
 	Object oo = fromStlFile("dev.stl");
-	Object oo2 = fromStlFile("car.stl");
-	glm_translate(oo2.model, (vec3) { -8, -2.9, -7 });
-	//glm_scale(oo2.model, (vec3) { 0.2, 0.2, 0.2 });
+	Object oo2 = fromStlFile("build.stl");
+	Object oo3 = fromStlFile("cage.stl");
+	Object oo4 = fromStlFile("cage.stl");
+	Object oo5 = fromStlFile("ico.stl");
+	glm_translate(oo2.model, (vec3) { -10, -2.9, -10.5 });
+
+	//setShader(&oo5, lightShader);
+	setPos(&oo4, (vec3) { -5, -1, -4 });
+	setPos(&oo5, (vec3) { -5, -1, -4 });
+	//glm_scale(oo5.model, (vec3) { 0.2, 0.2, 0.2 });
 	//glm_rotate(oo2.model, 3.1415 / 180 * 90, (vec3) { 1, 0, 0 });
 	objects[0] = oo2;
 	objects[1] = oo;
+	objects[2] = oo3;
 	objects[9] = plane;
+	objects[10] = oo4;
+	objects[11] = oo5;
 	
 	LightSource* ls = generateDirectionalLight(
 		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
 		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f }, (vec3){ 0.5f, 0.5f, 0.5f }, 0.85f);
 	
-	LightSource* ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 1.0f, 0.09, 0.032,
-		(vec3) { 0.05f, 0.05f, 0.05f }, (vec3) { 0.8f, 0.8f, 0.8f }, (vec3) { 1.0f, 1.0f, 1.0f });
+	LightSource* ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 
+		1.0f, 0.09, 0.032,
+		(vec3) { 0.05f, 0.05f, 0.05f },
+		(vec3) { 0.8f, 0.8f, 0.8f },
+		(vec3) { 1.0f, 1.0f, 1.0f });
 
 	LightSource* ps2 = generatePointLight((vec3) { pointLightPositions[1][0],
 		pointLightPositions[1][1],
@@ -235,6 +248,15 @@ int main()
 		(vec3) { 0.8f, 0.8f, 0.8f },
 		(vec3) { 1.0f, 1.0f, 1.0f });
 
+	LightSource* ps3 = generatePointLight((vec3) { pointLightPositions[2][0],
+		pointLightPositions[2][1],
+		pointLightPositions[2][2] }, 1.0f, 0.09, 0.032,
+		(vec3) {0.05f, 0.05f, 0.05f}, 
+		(vec3) { 0.8f, 0.9f, 0.8f },
+		(vec3) { 1.0f, 1.0f, 1.0f });
+
+
+	
 	SpotLight sli = { 
 	{0, 2, -4},
 	{0,-1,0},
@@ -247,42 +269,20 @@ int main()
 	LightSource sps = { TYPE_SPOT_LIGHT, &sli };
 	initLight(&sps);
 
-	LightSource lights[] = {ps, ps2};
+	LightSource lights[] = {ps, ps2, ps3};
 
-	// configure depth map FBO
-	// -----------------------
-	unsigned int depthMapFBO;
-	glGenFramebuffers(1, &depthMapFBO);
-	// create depth cubemap texture
-	unsigned int depthCubemap;
-	glGenTextures(1, &depthCubemap);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-	for (unsigned int i = 0; i < 6; ++i)
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	// attach depth texture as FBO's depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	useShader(standartShader);
-	setInt(standartShader, "shadowMap", 0);
-	useShader(simpleDepthShader);
-	setInt(simpleDepthShader, "depthMap", 1);
 	
+
+	vec3 curPos = { oo5.location[0], oo5.location[1],oo5.location[2] };
+	vec3 velocity = { -1, -2, 2 };
+	vec3 grav = { 0, -9.8f, 0 };
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		
-		//printf("%f\n", deltaTime);
+		printf("%f\n", deltaTime);
 		
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -293,11 +293,32 @@ int main()
 		
 		//----------------
 		//================= Calc shadows
-		
+		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 0.01,
+			(vec3) { 0, 1, 0 });
+		setPos(&(lightModels[0]), ((PointLight*)(ps->lightSrc))->position);
+		//((PointLight*)(ps3->lightSrc))->position[0] += 1*deltaTime;
 		recalculateShadows(standartShader, ps, objects);
 		
 		useShader(standartShader);
 		setProjectionView(&pl, standartShader);
+		//--
+
+		if(velocity[1] <0 && curPos[1]<-2 || velocity[1] > 0 && curPos[1]>0 )
+		{
+			velocity[1] *= -1;
+		}
+		if (velocity[0]<0 && curPos[0] < -6 || velocity[0]>0 && curPos[0]>-4)
+		{
+			velocity[0] *= -1;
+		}
+		if (velocity[2] < 0 && curPos[2] < -5 || velocity[2]>0 && curPos[2]>-3)
+		{
+			velocity[2] *= -1;
+		}
+		glm_vec3_add(curPos, (vec3) { velocity[0]*deltaTime, velocity[1] * deltaTime,
+			velocity[2] * deltaTime}, curPos);
+		
+		setPos(&oo5, curPos);
 		
 		//((PointLight*)(ps->lightSrc))->position[0] += 0.002;
 		//glm_translate(lightModels[0].model, (vec3) { 0.001, 0, 0 });
@@ -310,7 +331,7 @@ int main()
 
 		//glActiveTexture(GL_TEXTURE0);
 		//glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-		renderLights(standartShader, lights, 2);
+		renderLights(standartShader, lights, 3);
 		
 		setVec3(standartShader, "material.ambient", 1.0f, 0.5f, 0.31f);
 		setVec3(standartShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
@@ -323,10 +344,11 @@ int main()
 			if(i<9)
 			rotateAxis(&(objects[i]), 0.1f*i, (vec3) { (i+1)%10, i%10, 0 });
 		}
-		
+		oo4.render(&oo4);
+		oo5.render(&oo5);
 		useShader(lightShader);
 		setProjectionView(&pl, lightShader);
-		for (unsigned int i = 0; i < 2; i++)
+		for (unsigned int i = 0; i < 3; i++)
 		{
 			lightModels[i].render(&(lightModels[i]));
 		}

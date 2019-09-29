@@ -132,6 +132,12 @@
     <None Include="car.stl">
       <Filter>Файлы ресурсов\Models\STL</Filter>
     </None>
+    <None Include="build.stl">
+      <Filter>Файлы ресурсов\Models\STL</Filter>
+    </None>
+    <None Include="cage.stl">
+      <Filter>Файлы ресурсов\Models\STL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="ARIAL.TTF">
