@@ -244,9 +244,9 @@ Object fromStlFile(char* name)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 	glBindVertexArray(0);
-	obj.color[0] = 0.7f;
-	obj.color[1] = 0.5f;
-	obj.color[2]= 0.61f;
+	obj.color[0] = 0.4f;
+	obj.color[1] = 0.4f;
+	obj.color[2] = 0.4f;
 	obj.render = &renderObjectStandart;
 	return obj;
 }
@@ -262,4 +262,19 @@ void setPos(Object* obj, vec3 axis)
 	obj->location[0] = axis[0];
 	obj->location[1] = axis[1];
 	obj->location[2] = axis[2];
+}
+void appendObject(ListObjects* o, Object obj)
+{
+	if(o->objects == NULL)
+	{
+		o->objects = (Object*)malloc(sizeof(Object));
+		o->count = 1;
+		o->objects[0] = obj;
+	}
+	else
+	{
+		o->objects = (Object*)realloc(o->objects, sizeof(Object)*(o->count+1));
+		o->objects[o->count] = obj;
+		o->count++;
+	}
 }

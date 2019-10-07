@@ -10,13 +10,14 @@
 
 static int windowWidth = 1280, windowHeight = 720;
 
-static unsigned int SHADOW_WIDTH = 512, SHADOW_HEIGHT = 512;
+static unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
 Shader* standartShader;
 Shader* simpleDepthShader;
 
 
 GLFWwindow* initWindow(int w, int h);
+void renderListObjects(ListObjects* li);
 void renderObjectStandart(Object* obj);
 void renderObjectCustom(Object* obj);
 void renderObjectSpecificShader(Object* obj, Shader* sh);
@@ -26,7 +27,7 @@ void renderSpotLight(Shader* sh, struct LightSource* ls);
 
 void renderLights(Shader* sh, struct LightSource** ls, int size);
 
-void recalculateShadows(Shader* s, struct LightSource* ls, Object* objects);
-void renderScene(Shader* shader, Object* objects);
+void recalculateShadows(Shader* s, struct LightSource* ls, Object* objects, int count);
+void renderScene(Shader* shader, Object* objects, int count);
 
 #endif

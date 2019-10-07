@@ -185,22 +185,23 @@ int main()
 
 	//glEnable(GL_CULL_FACE);
 	
-	Object obj;
-	obj = generateCube(1);
-	glm_translate(obj.model, cubePositions[9]);
-	rotateAxis(&obj, 45, (vec3) { 1, 0, 0 });
-
+	
+	ListObjects list={NULL, 0};
 	Object objects[12];
 	for (int i = 0; i < 9; i++)
 	{
 		objects[i] = generateCube(1);
+		appendObject(&list, objects[i]);
 		glm_translate(objects[i].model, cubePositions[i]);
+		glm_translate(list.objects[i].model, cubePositions[i]);
+
 	}
 
 	Object lightModels[3];
 	for (int i = 0; i < 3; i++)
 	{
 		lightModels[i] = generateCube(0.3f);
+		appendObject(&list, lightModels[i]);
 		setPos(&(lightModels[i]), pointLightPositions[i]);
 		//glm_scale(lightModels[i].model, (vec3) { 0.3, 0.3, 0.3 });
 		setShader(&(lightModels[i]), lightShader);
@@ -212,29 +213,29 @@ int main()
 	glm_scale(plane.model, (vec3) { 200.0f, 1.0f, 200.0f });
 	rotateAxis(&plane, 90, (vec3) { 1.0f, 0.0f, 0.0f });
 	
-	Object oo = fromStlFile("dev.stl");
-	Object oo2 = fromStlFile("build.stl");
-	Object oo3 = fromStlFile("cage.stl");
-	Object oo4 = fromStlFile("cage.stl");
-	Object oo5 = fromStlFile("ico.stl");
-	glm_translate(oo2.model, (vec3) { -10, -2.9, -10.5 });
+	Object bigIco = fromStlFile("dev.stl");
+	Object ico = fromStlFile("ico.stl");
+	Object cageModel2 = fromStlFile("cage.stl");
+	Object cageModel = fromStlFile("cage.stl");	
+	Object smallIco = fromStlFile("ico.stl");
+	glm_translate(ico.model, (vec3) { -10, -2.9, -10.5 });
 
 	//setShader(&oo5, lightShader);
-	setPos(&oo4, (vec3) { -5, -1, -4 });
-	setPos(&oo5, (vec3) { -5, -1, -4 });
+	setPos(&cageModel, (vec3) { -5, -1, -4 });
+	setPos(&smallIco, (vec3) { -5, -1, -4 });
 	//glm_scale(oo5.model, (vec3) { 0.2, 0.2, 0.2 });
 	//glm_rotate(oo2.model, 3.1415 / 180 * 90, (vec3) { 1, 0, 0 });
-	objects[0] = oo2;
-	objects[1] = oo;
-	objects[2] = oo3;
-	objects[9] = plane;
-	objects[10] = oo4;
-	objects[11] = oo5;
+	list.objects[0] = objects[0] = ico;
+	list.objects[1] = objects[1] = bigIco;
+	list.objects[2] = objects[2] = cageModel2;
+	list.objects[9] = objects[9] = plane;
+	list.objects[10] = objects[10] = cageModel;
+	list.objects[11] = objects[11] = smallIco;
 	
 	LightSource* ls = generateDirectionalLight(
 		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
 		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f },
-		(vec3){ 0.5f, 0.5f, 0.5f }, 0.001f);
+		(vec3){ 0.5f, 0.5f, 0.5f }, 0.11f);
 	
 	LightSource* ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 
 		1.0f, 0.09, 0.032,
@@ -273,9 +274,13 @@ int main()
 	LightSource lights[] = {ls,ps, ps2, ps3};
 
 	
-
-	vec3 curPos = { oo5.location[0], oo5.location[1],oo5.location[2] };
-	vec3 velocity = { -1, -2, 2 };
+	ListObjects lightList = { NULL, 0 };
+	appendObject(&lightList, lightModels[0]);
+	appendObject(&lightList, lightModels[1]);
+	appendObject(&lightList, lightModels[2]);
+	
+	vec3 curPos = { smallIco.location[0], smallIco.location[1],smallIco.location[2] };
+	vec3 velocity = { -1, -1.5, 2 };
 	vec3 grav = { 0, -9.8f, 0 };
 	while (!glfwWindowShouldClose(window))
 	{
@@ -296,12 +301,13 @@ int main()
 		//================= Calc shadows
 		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 1*deltaTime,
 			(vec3) { 0, 1, 0 });
-		setPos(&(lightModels[0]), ((PointLight*)(ps->lightSrc))->position);
+		setPos(&(lightList.objects[0]), ((PointLight*)(ps->lightSrc))->position);
 		//((PointLight*)(ps3->lightSrc))->position[0] += 1*deltaTime;
-		recalculateShadows(standartShader, ps, objects);
+		recalculateShadows(standartShader, ps, objects, 12);
 		
-		useShader(standartShader);
+		setProjectionView(&pl, lightShader);
 		setProjectionView(&pl, standartShader);
+
 		//--
 
 		if(velocity[1] <0 && curPos[1]<-2 || velocity[1] > 0 && curPos[1]>0 )
@@ -319,7 +325,7 @@ int main()
 		glm_vec3_add(curPos, (vec3) { velocity[0]*deltaTime, velocity[1] * deltaTime,
 			velocity[2] * deltaTime}, curPos);
 		
-		setPos(&oo5, curPos);
+		setPos(&smallIco, curPos);
 		
 		//((PointLight*)(ps->lightSrc))->position[0] += 0.002;
 		//glm_translate(lightModels[0].model, (vec3) { 0.001, 0, 0 });
@@ -342,16 +348,12 @@ int main()
 		{
 			objects[i].render(&(objects[i]));
 			if(i<9)
-			rotateAxis(&(objects[i]), 0.1f*i, (vec3) { (i+1)%10, i%10, 0 });
+				rotateAxis(&(objects[i]), 0.1f*i, (vec3) { (i+1)%10, i%10, 0 });
+			//list.objects[i].render(&(list.objects[i]));
 		}
-		oo4.render(&oo4);
-		oo5.render(&oo5);
-		useShader(lightShader);
-		setProjectionView(&pl, lightShader);
-		for (unsigned int i = 0; i < 3; i++)
-		{
-			lightModels[i].render(&(lightModels[i]));
-		}
+		cageModel.render(&cageModel);
+		smallIco.render(&smallIco);
+		renderListObjects(&lightList);
 
 		glBindVertexArray(0);
 

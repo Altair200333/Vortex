@@ -188,7 +188,7 @@ void renderLights(Shader* sh, LightSource** ls, int size)
 //Recalculate lighting for single light Source
 //Set shadow map/cubemap data to shader
 //.. Actually renders scene from light's perspective
-void recalculateShadows(Shader* s, LightSource* ls, Object* objects)
+void recalculateShadows(Shader* s, LightSource* ls, Object* objects, int count)
 {
 	// configure depth map FBO
 	// -----------------------
@@ -207,7 +207,7 @@ void recalculateShadows(Shader* s, LightSource* ls, Object* objects)
 	}
 	setFloat(simpleDepthShader, "far_plane", far_plane);
 	setVec3(simpleDepthShader, "lightPos", pl->position[0], pl->position[1], pl->position[2]);
-	renderScene(simpleDepthShader, objects);
+	renderScene(simpleDepthShader, objects, count);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glViewport(0, 0, 1280, 720);
@@ -220,11 +220,18 @@ void recalculateShadows(Shader* s, LightSource* ls, Object* objects)
 	glViewport(0, 0, windowWidth, windowHeight);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-void renderScene(Shader* shader, Object* objects)
+void renderScene(Shader* shader, Object* objects, int count)
 {
-	for (unsigned int i = 0; i < 12; i++)
+	for (unsigned int i = 0; i < count; i++)
 	{
 		renderObjectSpecificShader(&(objects[i]), shader);
 		//rotateAxis(&(objects[i]), 0.19f, (vec3) { (i+1)%10, i%10, 0 });
+	}
+}
+void renderListObjects(ListObjects* li)
+{
+	for(int i=0;i<li->count;i++)
+	{
+		li->objects[i].render(&(li->objects[i]));
 	}
 }

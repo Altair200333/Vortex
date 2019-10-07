@@ -21,6 +21,13 @@ typedef struct
 	void(*render)(Object);
 }Object;
 
+typedef struct
+{
+	Object* objects;
+	size_t count;
+}ListObjects;
+
+void appendObject(ListObjects* o, Object obj);
 void setShader(Object* obj, Shader* shader);
 Object generateCube(float scale);
 Object generatePlane(float scale);
