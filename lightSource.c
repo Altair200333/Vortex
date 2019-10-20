@@ -67,6 +67,23 @@ void initShadowProperties(LightSource* src)
 	useShader(simpleDepthShader);
 	setInt(simpleDepthShader, "depthMap", 1);
 }
+
+void appendLigthSource(LightList* o, LightSource obj)
+{
+	if (o->lights == NULL)
+	{
+		o->lights = (Object*)malloc(sizeof(LightSource));
+		o->count = 1;
+		o->lights[0] = obj;
+	}
+	else
+	{
+		o->lights = (Object*)realloc(o->lights, sizeof(LightSource)*(o->count + 1));
+		o->lights[o->count] = obj;
+		o->count++;
+	}
+}
+
 void initLight(LightSource* src)
 {
 	if (src->type == TYPE_DIRECTIONAl_LIGHT)

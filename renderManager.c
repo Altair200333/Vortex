@@ -96,8 +96,6 @@ void renderDirectionalLight(Shader* sh, LightSource* ls)
 	setFloat(sh, "dirLight.strength", dr->strength);
 }
 
-//Ну давай, скажи как плох этот код. На С++ и тем более Java написал бы по-человечески
-//Тут как бы по большей части специфичный код, вставить туда, вотнкуть сюда, + строки - больно с ними в С(ну или я не оч умею)
 
 //Set this light data to shader, recalculate light affect
 void renderPointLight(Shader* sh, LightSource* ls) 
@@ -220,6 +218,25 @@ void recalculateShadows(Shader* s, LightSource* ls, Object* objects, int count)
 	glViewport(0, 0, windowWidth, windowHeight);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
+
+void renderListLights(Shader* sh, LightList* list)
+{
+	for (int i = 0; i < list->count; i++)
+	{
+		list->lights[i].render(sh, (struct LightSource*)&(list->lights[i]));
+	}
+	setInt(sh, "pointLightsCount", currentPointLightId);
+	setInt(sh, "spotLightsCount", currentSpotLightId);
+
+	currentPointLightId = 0;
+	currentSpotLightId = 0;
+}
+
+void recalculateShadowsList(Shader* s, struct LightSource* ls, ListObjects* list)
+{
+	recalculateShadows(s, ls, list->objects, list->count);
+}
+
 void renderScene(Shader* shader, Object* objects, int count)
 {
 	for (unsigned int i = 0; i < count; i++)

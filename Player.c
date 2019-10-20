@@ -42,6 +42,8 @@ void translateM(Player* pl, vec3 dir, float m)
 void setProjectionView(Player* pl, Shader* s)
 {
 	useShader(s);
+
+	setVec3(s, "viewPos", pl->eye[0], pl->eye[1], pl->eye[2]);
 	GLint viewLoc = glGetUniformLocation(s->Program, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float*)pl->view);
 

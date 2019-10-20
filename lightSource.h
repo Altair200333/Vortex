@@ -8,6 +8,7 @@
 #include <cglm/mat4.h>
 #include <cglm/types.h>
 #include "renderManager.h"
+#include "../deps/linmath.h"
 
 static const int TYPE_DIRECTIONAl_LIGHT = 0;
 static const int TYPE_POINT_LIGHT = 1;
@@ -56,6 +57,7 @@ typedef struct {
 	vec3 specular;
 }SpotLight;
 
+
 typedef void(*renderFunc)(Shader* shader, struct LightSource* src);
 //0 - dirLight
 //1 - pointLight
@@ -65,6 +67,14 @@ typedef struct {
 	void* lightSrc;
 	renderFunc render;
 }LightSource;
+
+typedef struct
+{
+	LightSource* lights;
+	size_t count;
+}LightList;
+void appendLigthSource(LightList* o, LightSource obj);
+
 
 void initLight(LightSource* src);
 LightSource* generateDirectionalLight(vec3 direction, vec3 ambient, vec3 diffuse, vec3 specular, float strength);

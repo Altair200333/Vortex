@@ -50,8 +50,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	
 }
 //move player every frame(calback sucks)
-//TODO use delta time
-void move(GLFWwindow* window)
+void movePlayer(GLFWwindow* window)
 {
 	float speed = Fspeed * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -141,6 +140,26 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 
+void computeBouncingBall_T(Object smallIco, vec3 curPos, vec3 velocity)
+{
+	if(velocity[1] <0 && curPos[1]<-2 || velocity[1] > 0 && curPos[1]>0 )
+	{
+		velocity[1] *= -1;
+	}
+	if (velocity[0]<0 && curPos[0] < -6 || velocity[0]>0 && curPos[0]>-4)
+	{
+		velocity[0] *= -1;
+	}
+	if (velocity[2] < 0 && curPos[2] < -5 || velocity[2]>0 && curPos[2]>-3)
+	{
+		velocity[2] *= -1;
+	}
+	glm_vec3_add(curPos, (vec3) { velocity[0]*deltaTime, velocity[1] * deltaTime,
+		             velocity[2] * deltaTime}, curPos);
+		
+	setPos(&smallIco, curPos);
+}
+
 int main()
 {
 	GLFWwindow* window = initWindow(windowWidth, windowHeight);
@@ -187,50 +206,39 @@ int main()
 	
 	
 	ListObjects list={NULL, 0};
-	Object objects[12];
-	for (int i = 0; i < 9; i++)
-	{
-		objects[i] = generateCube(1);
-		appendObject(&list, objects[i]);
-		glm_translate(objects[i].model, cubePositions[i]);
-		glm_translate(list.objects[i].model, cubePositions[i]);
 
+	for (unsigned int i = 0; i < 9; i++)
+	{
+		appendObject(&list, generateCube(1));
+		glm_translate(list.objects[i].model, cubePositions[i]);
 	}
 
 	Object lightModels[3];
 	for (int i = 0; i < 3; i++)
 	{
 		lightModels[i] = generateCube(0.3f);
-		appendObject(&list, lightModels[i]);
+		//appendObject(&list, lightModels[i]);
 		setPos(&(lightModels[i]), pointLightPositions[i]);
 		//glm_scale(lightModels[i].model, (vec3) { 0.3, 0.3, 0.3 });
 		setShader(&(lightModels[i]), lightShader);
 	}
 
-	Object plane;
-	plane = generatePlane(1);
-	glm_translate(plane.model, (vec3) { 2, -4.0f, -2 });
-	glm_scale(plane.model, (vec3) { 200.0f, 1.0f, 200.0f });
-	rotateAxis(&plane, 90, (vec3) { 1.0f, 0.0f, 0.0f });
+	appendObject(&list,  generatePlane(1));
+	glm_translate(list.objects[list.count-1].model, (vec3) { 2, -4.0f, -2 });
+	glm_scale(list.objects[list.count - 1].model, (vec3) { 200.0f, 1.0f, 200.0f });
+	rotateAxis(&list.objects[list.count - 1], 90, (vec3) { 1.0f, 0.0f, 0.0f });
 	
-	Object bigIco = fromStlFile("dev.stl");
-	Object ico = fromStlFile("ico.stl");
-	Object cageModel2 = fromStlFile("cage.stl");
-	Object cageModel = fromStlFile("cage.stl");	
-	Object smallIco = fromStlFile("ico.stl");
-	glm_translate(ico.model, (vec3) { -10, -2.9, -10.5 });
+	appendObject(&list, fromStlFile("dev.stl"));
+	appendObject(&list, fromStlFile("ico.stl"));
+	glm_translate(list.objects[list.count - 1].model, (vec3) { -10, -2.9, -10.5 });
 
-	//setShader(&oo5, lightShader);
-	setPos(&cageModel, (vec3) { -5, -1, -4 });
-	setPos(&smallIco, (vec3) { -5, -1, -4 });
-	//glm_scale(oo5.model, (vec3) { 0.2, 0.2, 0.2 });
-	//glm_rotate(oo2.model, 3.1415 / 180 * 90, (vec3) { 1, 0, 0 });
-	list.objects[0] = objects[0] = ico;
-	list.objects[1] = objects[1] = bigIco;
-	list.objects[2] = objects[2] = cageModel2;
-	list.objects[9] = objects[9] = plane;
-	list.objects[10] = objects[10] = cageModel;
-	list.objects[11] = objects[11] = smallIco;
+	appendObject(&list, fromStlFile("cage.stl"));
+	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
+	
+	appendObject(&list, fromStlFile("cage.stl"));
+	appendObject(&list, fromStlFile("ico.stl"));
+	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
+	
 	
 	LightSource* ls = generateDirectionalLight(
 		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
@@ -271,17 +279,29 @@ int main()
 	LightSource sps = { TYPE_SPOT_LIGHT, &sli };
 	initLight(&sps);
 
-	LightSource lights[] = {ls,ps, ps2, ps3};
+	LightSource* lights[] = {ls,ps, ps2, ps3};
 
+	useShader(standartShader);
+	setFloat(standartShader, "far_plane", far_plane);
+	setVec3(standartShader, "material.ambient", 1.0f, 0.5f, 0.31f);
+	setVec3(standartShader, "material.specular", 0.5f, 0.5f, 0.5f);
+	setFloat(standartShader, "material.shininess", 16.0f);
 	
 	ListObjects lightList = { NULL, 0 };
 	appendObject(&lightList, lightModels[0]);
 	appendObject(&lightList, lightModels[1]);
 	appendObject(&lightList, lightModels[2]);
+
+	LightList ll = { NULL, 0 };
+	for(int i=0;i<4;i++)
+	{
+		appendLigthSource(&ll, *(lights[i]));
+	}
 	
-	vec3 curPos = { smallIco.location[0], smallIco.location[1],smallIco.location[2] };
+	vec3 curPos = { list.objects[12].location[0], list.objects[12].location[1],list.objects[12].location[2] };
 	vec3 velocity = { -1, -1.5, 2 };
 	vec3 grav = { 0, -9.8f, 0 };
+	
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
@@ -294,7 +314,7 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//--DRAW
-		move(window);
+		movePlayer(window);
 		recalculate(&pl);
 		
 		//----------------
@@ -302,62 +322,33 @@ int main()
 		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 1*deltaTime,
 			(vec3) { 0, 1, 0 });
 		setPos(&(lightList.objects[0]), ((PointLight*)(ps->lightSrc))->position);
-		//((PointLight*)(ps3->lightSrc))->position[0] += 1*deltaTime;
-		recalculateShadows(standartShader, ps, objects, 12);
+
+		recalculateShadowsList(standartShader, ps, &list);
 		
 		setProjectionView(&pl, lightShader);
 		setProjectionView(&pl, standartShader);
 
 		//--
 
-		if(velocity[1] <0 && curPos[1]<-2 || velocity[1] > 0 && curPos[1]>0 )
-		{
-			velocity[1] *= -1;
-		}
-		if (velocity[0]<0 && curPos[0] < -6 || velocity[0]>0 && curPos[0]>-4)
-		{
-			velocity[0] *= -1;
-		}
-		if (velocity[2] < 0 && curPos[2] < -5 || velocity[2]>0 && curPos[2]>-3)
-		{
-			velocity[2] *= -1;
-		}
-		glm_vec3_add(curPos, (vec3) { velocity[0]*deltaTime, velocity[1] * deltaTime,
-			velocity[2] * deltaTime}, curPos);
+		computeBouncingBall_T(list.objects[12], curPos, velocity);
 		
-		setPos(&smallIco, curPos);
 		
-		//((PointLight*)(ps->lightSrc))->position[0] += 0.002;
-		//glm_translate(lightModels[0].model, (vec3) { 0.001, 0, 0 });
-		setVec3( standartShader, "viewPos", pl.eye[0], pl.eye[1], pl.eye[2]);
 		setVec3( standartShader, "lightPos", 
 			((PointLight*)(ps->lightSrc))->position[0],
 			((PointLight*)(ps->lightSrc))->position[1],
 			((PointLight*)(ps->lightSrc))->position[2]);
-		setFloat(standartShader, "far_plane", far_plane);
 
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-		renderLights(standartShader, lights, 4);
 		
-		setVec3(standartShader, "material.ambient", 1.0f, 0.5f, 0.31f);
-		setVec3(standartShader, "material.specular", 0.5f, 0.5f, 0.5f);
-		setFloat(standartShader,"material.shininess", 16.0f);
+		renderListLights(standartShader, &ll);
+		rotateAxis(&(list.objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
+		//rotateAxis(&(objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
+		renderListObjects(&list);
 		
-		for (unsigned int i = 0; i < 10; i++)
-		{
-			objects[i].render(&(objects[i]));
-			if(i<9)
-				rotateAxis(&(objects[i]), 0.1f*i, (vec3) { (i+1)%10, i%10, 0 });
-			//list.objects[i].render(&(list.objects[i]));
-		}
-		cageModel.render(&cageModel);
-		smallIco.render(&smallIco);
+		
 		renderListObjects(&lightList);
 
 		glBindVertexArray(0);
 
-		counter++;
 		//End Draw Calls
 		glfwSwapBuffers(window);
 	}
