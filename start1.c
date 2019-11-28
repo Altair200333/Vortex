@@ -20,6 +20,7 @@
 #include "Player.h"
 #include "textType.h"
 #include "lightSource.h"
+#include "Scene.h"
 
 bool EdgeViewMode = false;
 Player pl;
@@ -140,26 +141,56 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 
-void computeBouncingBall_T(Object smallIco, vec3 curPos, vec3 velocity)
+
+
+void initLights(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, LightSource** ps, LightSource** ps2, LightSource** ps3)
 {
-	if(velocity[1] <0 && curPos[1]<-2 || velocity[1] > 0 && curPos[1]>0 )
-	{
-		velocity[1] *= -1;
-	}
-	if (velocity[0]<0 && curPos[0] < -6 || velocity[0]>0 && curPos[0]>-4)
-	{
-		velocity[0] *= -1;
-	}
-	if (velocity[2] < 0 && curPos[2] < -5 || velocity[2]>0 && curPos[2]>-3)
-	{
-		velocity[2] *= -1;
-	}
-	glm_vec3_add(curPos, (vec3) { velocity[0]*deltaTime, velocity[1] * deltaTime,
-		             velocity[2] * deltaTime}, curPos);
-		
-	setPos(&smallIco, curPos);
+	*ls = generateDirectionalLight(
+		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
+		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f },
+		(vec3){ 0.5f, 0.5f, 0.5f }, 0.41f);
+
+	*ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 
+	                         1.0f, 0.09, 0.032,
+	                         (vec3) { 0.05f, 0.05f, 0.05f },
+	                         (vec3) { 0.8f, 0.8f, 0.8f },
+	                         (vec3) { 1.0f, 1.0f, 1.0f });
+
+	*ps2 = generatePointLight((vec3) { pointLightPositions[1][0],
+		                          pointLightPositions[1][1],
+		                          pointLightPositions[1][2] }, 1.0f, 0.09, 0.032,
+	                          (vec3) {0.05f, 0.05f, 0.05f}, 
+	                          (vec3) { 0.8f, 0.8f, 0.8f },
+	                          (vec3) { 1.0f, 1.0f, 1.0f });
+
+	*ps3 = generatePointLight((vec3) { pointLightPositions[2][0],
+		                          pointLightPositions[2][1],
+		                          pointLightPositions[2][2] }, 1.0f, 0.09, 0.032,
+	                          (vec3) {0.05f, 0.05f, 0.05f}, 
+	                          (vec3) { 0.8f, 0.9f, 0.8f },
+	                          (vec3) { 1.0f, 1.0f, 1.0f });
 }
 
+//Every collision creates counteracting impulse applying to body
+void computeCubeFall(Object* obj)
+{
+	printf("Vel %f, %f\n", obj->rigidBody.lineralVel[1], obj->location[1]);
+	float floorHeight = -3;
+	
+	if(obj->location[1] > floorHeight)
+	{
+		obj->rigidBody.lineralVel[1] -= 9.81*deltaTime/4;
+		vec3 shift = { 0,obj->rigidBody.lineralVel[1] * deltaTime,0 };
+		translateLocal(obj, shift);
+	}
+	else
+	{
+		obj->rigidBody.lineralVel[1] -= obj->rigidBody.lineralVel[1];
+		vec3 shift = { 0,obj->rigidBody.lineralVel[1] * deltaTime,0 };
+		translateLocal(obj, shift);
+	}
+	
+}
 int main()
 {
 	GLFWwindow* window = initWindow(windowWidth, windowHeight);
@@ -210,7 +241,8 @@ int main()
 	for (unsigned int i = 0; i < 9; i++)
 	{
 		appendObject(&list, generateCube(1));
-		glm_translate(list.objects[i].model, cubePositions[i]);
+		translateLocal(&(list.objects[i]), cubePositions[i]);
+		//glm_translate(list.objects[i].model, cubePositions[i]);
 	}
 
 	Object lightModels[3];
@@ -238,35 +270,15 @@ int main()
 	appendObject(&list, fromStlFile("cage.stl"));
 	appendObject(&list, fromStlFile("ico.stl"));
 	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
-	
-	
-	LightSource* ls = generateDirectionalLight(
-		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
-		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f },
-		(vec3){ 0.5f, 0.5f, 0.5f }, 0.11f);
-	
-	LightSource* ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 
-		1.0f, 0.09, 0.032,
-		(vec3) { 0.05f, 0.05f, 0.05f },
-		(vec3) { 0.8f, 0.8f, 0.8f },
-		(vec3) { 1.0f, 1.0f, 1.0f });
-
-	LightSource* ps2 = generatePointLight((vec3) { pointLightPositions[1][0],
-		pointLightPositions[1][1],
-		pointLightPositions[1][2] }, 1.0f, 0.09, 0.032,
-		(vec3) {0.05f, 0.05f, 0.05f}, 
-		(vec3) { 0.8f, 0.8f, 0.8f },
-		(vec3) { 1.0f, 1.0f, 1.0f });
-
-	LightSource* ps3 = generatePointLight((vec3) { pointLightPositions[2][0],
-		pointLightPositions[2][1],
-		pointLightPositions[2][2] }, 1.0f, 0.09, 0.032,
-		(vec3) {0.05f, 0.05f, 0.05f}, 
-		(vec3) { 0.8f, 0.9f, 0.8f },
-		(vec3) { 1.0f, 1.0f, 1.0f });
 
 
-	
+	LightSource* ls;
+	LightSource* ps;
+	LightSource* ps2;
+	LightSource* ps3;
+	initLights(lightPos, pointLightPositions, &ls, &ps, &ps2, &ps3);
+
+
 	SpotLight sli = { 
 	{0, 2, -4},
 	{0,-1,0},
@@ -298,9 +310,9 @@ int main()
 		appendLigthSource(&ll, *(lights[i]));
 	}
 	
-	vec3 curPos = { list.objects[12].location[0], list.objects[12].location[1],list.objects[12].location[2] };
-	vec3 velocity = { -1, -1.5, 2 };
-	vec3 grav = { 0, -9.8f, 0 };
+	Scene scene;
+	scene.sceneObjects = list;
+	scene.lights = ll;
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -308,7 +320,7 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		
-		printf("%f\n", deltaTime);
+		//printf("%f\n", deltaTime);
 		
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -328,10 +340,7 @@ int main()
 		setProjectionView(&pl, lightShader);
 		setProjectionView(&pl, standartShader);
 
-		//--
-
-		computeBouncingBall_T(list.objects[12], curPos, velocity);
-		
+		//--		
 		
 		setVec3( standartShader, "lightPos", 
 			((PointLight*)(ps->lightSrc))->position[0],
@@ -340,7 +349,11 @@ int main()
 
 		
 		renderListLights(standartShader, &ll);
-		rotateAxis(&(list.objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
+		rotateAxis(&(list.objects[3]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
+		//rotateAxis(&(list.objects[5]), 0.6f, (vec3) { 0, 0.2, -0 });
+		
+		computeCubeFall(&(list.objects[4]));
+		computeCubeFall(&(list.objects[5]));
 		//rotateAxis(&(objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
 		renderListObjects(&list);
 		

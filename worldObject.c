@@ -60,8 +60,8 @@ Object generateCube(float scale)
 	Object obj = {0,0, {  1, 0, 0, 0,
 					0, 1, 0, 0,
 					0, 0, 1, 0,
-					0, 0, 0, 1 }, {0,0,0}, vert, 36, NULL,
-		{1.0f, 0.5f, 0.31f} };
+					0, 0, 0, 1 }, {0,0,0},{0,0,0 }, vert, 36, NULL,
+		{1.0f, 0.5f, 0.31f}, 0, {0,0,0,0,0,0} };
 
 	glGenVertexArrays(1, &obj.VAO);
 	glGenBuffers(1, &obj.VBO);
@@ -89,6 +89,13 @@ void rotateAxis(Object* obj, float angle, vec3 axis)
 	glm_translate(obj->model, obj->location);
 }
 
+void translateLocal(Object* obj, vec3 shift)
+{
+	glm_translate(obj->model,
+		shift);
+	glm_vec3_add(obj->location, shift, obj->location);
+	
+}
 void setShader(Object* obj, Shader* shader)
 {
 	if (shader == NULL)
@@ -116,7 +123,7 @@ Object generatePlane(float scale)
 					1, 0, 0, 0,
 					0, 1, 0, 0,
 					0, 0, 1, 0,
-					0, 0, 0, 1 }, {0,0,0}, vert, 6, NULL ,
+					0, 0, 0, 1 }, {0,0,0},{0,0,0}, vert, 6, NULL ,
 		{1.0f, 0.5f, 0.31f}};
 
 	glGenVertexArrays(1, &obj.VAO);
@@ -228,7 +235,7 @@ Object fromStlFile(char* name)
 					1, 0, 0, 0,
 					0, 1, 0, 0,
 					0, 0, 1, 0,
-					0, 0, 0, 1 }, {0,0,0}, vert, CurSize/2, NULL };
+					0, 0, 0, 1 }, {0,0,0},{0,0,0}, vert, CurSize/2, NULL };
 
 	glGenVertexArrays(1, &obj.VAO);
 	glGenBuffers(1, &obj.VBO);
@@ -248,6 +255,7 @@ Object fromStlFile(char* name)
 	obj.color[1] = 0.4f;
 	obj.color[2] = 0.4f;
 	obj.render = &renderObjectStandart;
+	obj.rigidBody = (RigidBody){ 0,0,0,0,0,0 };
 	return obj;
 }
 void setPos(Object* obj, vec3 axis)
