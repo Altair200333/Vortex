@@ -172,23 +172,41 @@ void initLights(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, Lig
 }
 
 //Every collision creates counteracting impulse applying to body
-void computeCubeFall(Object* obj)
+void computeCubeFall(Object* obj[], size_t count)
 {
-	printf("Vel %f, %f\n", obj->rigidBody.lineralVel[1], obj->location[1]);
 	float floorHeight = -3;
+	for(int i=0;i<count;i++)
+	{
+		printf("%f %f\n", obj[i]->rotation[0]*180/GLM_PI, cos(obj[i]->rotation[0] * 180 / GLM_PI));
+
+		if (obj[i]->location[1] > floorHeight)
+		{
+			(obj[i])->rigidBody.lineralVel[1] -= 9.81*deltaTime / 4;
+			vec3 shift = { 0,obj[i]->rigidBody.lineralVel[1] * deltaTime,0 };
+			translateGlobal(obj[i], shift);
+		}
+		else
+		{
+			vec3 ax;
+			
+			obj[i]->rigidBody.torgPoint[0]= -0.5f;
+			obj[i]->rigidBody.angularVel[1] = 1;
+			glm_vec3_cross(obj[i]->rigidBody.angularVel, obj[i]->rigidBody.torgPoint, ax);
+			float mag = 0;
+			for(int j=0;j<3;j++)
+			{
+				mag += obj[i]->rigidBody.angularVel[j] * obj[i]->rigidBody.angularVel[j];
+			}
+			mag *= 0.1f;
+			rotateAxis(obj[i], mag, ax);
+			
+			obj[i]->rigidBody.lineralVel[1] -= obj[i]->rigidBody.lineralVel[1]-(floorHeight- obj[i]->location[1]);
+			vec3 shift = { 0,obj[i]->rigidBody.lineralVel[1] * deltaTime,0 };
+			translateGlobal(obj[i], shift);
+		}
+		
+	}
 	
-	if(obj->location[1] > floorHeight)
-	{
-		obj->rigidBody.lineralVel[1] -= 9.81*deltaTime/4;
-		vec3 shift = { 0,obj->rigidBody.lineralVel[1] * deltaTime,0 };
-		translateLocal(obj, shift);
-	}
-	else
-	{
-		obj->rigidBody.lineralVel[1] -= obj->rigidBody.lineralVel[1];
-		vec3 shift = { 0,obj->rigidBody.lineralVel[1] * deltaTime,0 };
-		translateLocal(obj, shift);
-	}
 	
 }
 int main()
@@ -313,7 +331,12 @@ int main()
 	Scene scene;
 	scene.sceneObjects = list;
 	scene.lights = ll;
+	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 0,0, 1 });
+	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
+	rotateAxis(&(list.objects[3]), 45.0, (vec3) { 0,1, 0 });
 	
+	rotateAxis(&(list.objects[5]), 45.0, (vec3) { 1,0, 0 });
+	//rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
@@ -349,11 +372,12 @@ int main()
 
 		
 		renderListLights(standartShader, &ll);
-		rotateAxis(&(list.objects[3]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
-		//rotateAxis(&(list.objects[5]), 0.6f, (vec3) { 0, 0.2, -0 });
 		
-		computeCubeFall(&(list.objects[4]));
-		computeCubeFall(&(list.objects[5]));
+		rotateAxis(&(list.objects[3]), 20*deltaTime, (vec3) { 0, 1, 0 });
+		translateGlobal(&(list.objects[3]), (vec3) { 0, 0.005, 0 });
+
+
+		computeCubeFall((Object*[]){ &(list.objects[4]), &(list.objects[5])}, 2);
 		//rotateAxis(&(objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
 		renderListObjects(&list);
 		

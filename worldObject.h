@@ -13,6 +13,7 @@ typedef struct _RigidBody
 {
 	vec3 lineralVel;
 	vec3 angularVel;
+	vec3 torgPoint;
 }RigidBody;
 typedef struct
 {
@@ -43,4 +44,5 @@ Object fromStlFile(char* name);
 void rotateAxis(Object* obj, float angle, vec3 axis);
 void setPos(Object* obj, vec3 axis);
 void translateLocal(Object* obj, vec3 shift);
+void translateGlobal(Object* obj, vec3 shift);
 #endif

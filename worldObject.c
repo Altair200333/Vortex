@@ -61,7 +61,7 @@ Object generateCube(float scale)
 					0, 1, 0, 0,
 					0, 0, 1, 0,
 					0, 0, 0, 1 }, {0,0,0},{0,0,0 }, vert, 36, NULL,
-		{1.0f, 0.5f, 0.31f}, 0, {0,0,0,0,0,0} };
+		{1.0f, 0.5f, 0.31f}, 0, {0,0,0,0,0,0, 0,0,0} };
 
 	glGenVertexArrays(1, &obj.VAO);
 	glGenBuffers(1, &obj.VBO);
@@ -83,11 +83,13 @@ Object generateCube(float scale)
 }
 void rotateAxis(Object* obj, float angle, vec3 axis)
 {
-	glm_translate(obj->model, (vec3){-obj->location[0], -obj->location[1], -obj->location[2]});
+	//glm_translate(obj->model, (vec3){-obj->location[0], -obj->location[1], -obj->location[2]});
 
 	glm_rotate(obj->model, 3.1415926 / 180 * angle, axis);
-	glm_translate(obj->model, obj->location);
+	glm_euler_angles(obj->model, obj->rotation);
+	//glm_translate(obj->model, obj->location);
 }
+
 
 void translateLocal(Object* obj, vec3 shift)
 {
@@ -96,6 +98,36 @@ void translateLocal(Object* obj, vec3 shift)
 	glm_vec3_add(obj->location, shift, obj->location);
 	
 }
+
+//yea, this works, but performance sucks for sure. For now i have no idea about more efficient methods.
+void translateGlobal(Object* obj, vec3 shift)
+{
+	//current rotation in euler angles
+	vec3 rot;
+	glm_euler_angles(obj->model, rot);
+	
+	//matrix of current transform(rotation), is used to set rotation back to original
+	mat4 mat;
+	//inverse rotation matrix
+	mat4 mat1;
+	//get matrix
+	glm_euler(rot, mat);
+	//inverse it
+	//this operation seems to be CPU expensive, should find more optimised solution
+	glm_mat4_inv(mat, mat1);
+	
+	//rotate it in order to set object to default rotation with saving position and scale	
+	glm_mat4_mul(obj->model, mat1, obj->model);
+	//hell yea, translate it
+	glm_translate(obj->model,
+		shift);
+	//set rotation back by right multiplication
+	glm_mat4_mul(obj->model, mat, obj->model);
+	
+	//update position field
+	glm_vec3_add(obj->location, shift, obj->location);
+}
+
 void setShader(Object* obj, Shader* shader)
 {
 	if (shader == NULL)
