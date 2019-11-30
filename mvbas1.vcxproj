@@ -123,6 +123,7 @@
   <ItemGroup>
     <ClCompile Include="baseShader.c" />
     <ClCompile Include="lightSource.c" />
+    <ClCompile Include="physics.c" />
     <ClCompile Include="Player.c" />
     <ClCompile Include="renderManager.c" />
     <ClCompile Include="Scene.c" />
@@ -139,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="baseShader.h" />
     <ClInclude Include="lightSource.h" />
+    <ClInclude Include="physics.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="renderManager.h" />
     <ClInclude Include="Scene.h" />

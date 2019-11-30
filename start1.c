@@ -21,6 +21,7 @@
 #include "textType.h"
 #include "lightSource.h"
 #include "Scene.h"
+#include "physics.h"
 
 bool EdgeViewMode = false;
 Player pl;
@@ -171,44 +172,7 @@ void initLights(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, Lig
 	                          (vec3) { 1.0f, 1.0f, 1.0f });
 }
 
-//Every collision creates counteracting impulse applying to body
-void computeCubeFall(Object* obj[], size_t count)
-{
-	float floorHeight = -3;
-	for(int i=0;i<count;i++)
-	{
-		printf("%f %f\n", obj[i]->rotation[0]*180/GLM_PI, cos(obj[i]->rotation[0] * 180 / GLM_PI));
 
-		if (obj[i]->location[1] > floorHeight)
-		{
-			(obj[i])->rigidBody.lineralVel[1] -= 9.81*deltaTime / 4;
-			vec3 shift = { 0,obj[i]->rigidBody.lineralVel[1] * deltaTime,0 };
-			translateGlobal(obj[i], shift);
-		}
-		else
-		{
-			vec3 ax;
-			
-			obj[i]->rigidBody.torgPoint[0]= -0.5f;
-			obj[i]->rigidBody.angularVel[1] = 1;
-			glm_vec3_cross(obj[i]->rigidBody.angularVel, obj[i]->rigidBody.torgPoint, ax);
-			float mag = 0;
-			for(int j=0;j<3;j++)
-			{
-				mag += obj[i]->rigidBody.angularVel[j] * obj[i]->rigidBody.angularVel[j];
-			}
-			mag *= 0.1f;
-			rotateAxis(obj[i], mag, ax);
-			
-			obj[i]->rigidBody.lineralVel[1] -= obj[i]->rigidBody.lineralVel[1]-(floorHeight- obj[i]->location[1]);
-			vec3 shift = { 0,obj[i]->rigidBody.lineralVel[1] * deltaTime,0 };
-			translateGlobal(obj[i], shift);
-		}
-		
-	}
-	
-	
-}
 int main()
 {
 	GLFWwindow* window = initWindow(windowWidth, windowHeight);
@@ -237,7 +201,7 @@ int main()
 		{2.0f,  5.0f, -15.0f},
 		{-1.5f, -2.2f, -2.5f},
 		{-3.8f, -2.0f, -12.3f},
-		{2.4f, -0.4f, -3.5f},
+		{2.4f, -0.1f, -3.5f},
 		{-1.7f,  3.0f, -7.5f},
 		{1.3f, -2.0f, -2.5f},
 		{1.5f,  2.0f, -2.5f},
@@ -259,7 +223,7 @@ int main()
 	for (unsigned int i = 0; i < 9; i++)
 	{
 		appendObject(&list, generateCube(1));
-		translateLocal(&(list.objects[i]), cubePositions[i]);
+		translateGlobal(&(list.objects[i]), cubePositions[i]);
 		//glm_translate(list.objects[i].model, cubePositions[i]);
 	}
 
@@ -377,7 +341,7 @@ int main()
 		translateGlobal(&(list.objects[3]), (vec3) { 0, 0.005, 0 });
 
 
-		computeCubeFall((Object*[]){ &(list.objects[4]), &(list.objects[5])}, 2);
+		computeCubeFall((Object*[]){ &(list.objects[4]), &(list.objects[5])}, 2, deltaTime);
 		//rotateAxis(&(objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
 		renderListObjects(&list);
 		

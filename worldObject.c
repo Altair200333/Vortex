@@ -6,6 +6,19 @@
 #include "renderManager.h"
 #include <string.h>
 
+void initRigidBody(Object* obj)
+{
+	for(int i=0; i<3;i++)
+		obj->rigidBody.angularVel[i] = 0;
+	for (int i = 0; i < 3; i++)
+		obj->rigidBody.lastAcceleration[i] = 0;
+	for (int i = 0; i < 3; i++)
+		obj->rigidBody.acceleration[i] = 0;
+	for (int i = 0; i < 3; i++)
+		obj->rigidBody.lineralVel[i] = 0;
+	for (int i = 0; i < 3; i++)
+		obj->rigidBody.torgPoint[i] = 0;
+}
 Object generateCube(float scale)
 {
 	GLfloat vert[] = {
@@ -61,8 +74,8 @@ Object generateCube(float scale)
 					0, 1, 0, 0,
 					0, 0, 1, 0,
 					0, 0, 0, 1 }, {0,0,0},{0,0,0 }, vert, 36, NULL,
-		{1.0f, 0.5f, 0.31f}, 0, {0,0,0,0,0,0, 0,0,0} };
-
+		{1.0f, 0.5f, 0.31f}, 0};
+	initRigidBody(&obj);
 	glGenVertexArrays(1, &obj.VAO);
 	glGenBuffers(1, &obj.VBO);
 
@@ -157,7 +170,7 @@ Object generatePlane(float scale)
 					0, 0, 1, 0,
 					0, 0, 0, 1 }, {0,0,0},{0,0,0}, vert, 6, NULL ,
 		{1.0f, 0.5f, 0.31f}};
-
+	initRigidBody(&obj);
 	glGenVertexArrays(1, &obj.VAO);
 	glGenBuffers(1, &obj.VBO);
 
@@ -287,7 +300,7 @@ Object fromStlFile(char* name)
 	obj.color[1] = 0.4f;
 	obj.color[2] = 0.4f;
 	obj.render = &renderObjectStandart;
-	obj.rigidBody = (RigidBody){ 0,0,0,0,0,0 };
+	initRigidBody(&obj);
 	return obj;
 }
 void setPos(Object* obj, vec3 axis)

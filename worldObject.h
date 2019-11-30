@@ -14,6 +14,8 @@ typedef struct _RigidBody
 	vec3 lineralVel;
 	vec3 angularVel;
 	vec3 torgPoint;
+	vec3 lastAcceleration;
+	vec3 acceleration;
 }RigidBody;
 typedef struct
 {
@@ -36,6 +38,8 @@ typedef struct
 	size_t count;
 }ListObjects;
 
+
+void initRigidBody(Object* obj);
 void appendObject(ListObjects* o, Object obj);
 void setShader(Object* obj, Shader* shader);
 Object generateCube(float scale);
