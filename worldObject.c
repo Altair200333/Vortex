@@ -8,16 +8,15 @@
 
 void initRigidBody(Object* obj)
 {
-	for(int i=0; i<3;i++)
-		obj->rigidBody.angularVel[i] = 0;
-	for (int i = 0; i < 3; i++)
-		obj->rigidBody.lastAcceleration[i] = 0;
 	for (int i = 0; i < 3; i++)
 		obj->rigidBody.acceleration[i] = 0;
 	for (int i = 0; i < 3; i++)
 		obj->rigidBody.lineralVel[i] = 0;
-	for (int i = 0; i < 3; i++)
-		obj->rigidBody.torgPoint[i] = 0;
+	obj->rigidBody.mass = 1;
+	obj->rigidBody.alpha = 0;
+	obj->rigidBody.theta = 0;
+	obj->rigidBody.omega = 0;
+	obj->rigidBody.J = 1;
 }
 Object generateCube(float scale)
 {

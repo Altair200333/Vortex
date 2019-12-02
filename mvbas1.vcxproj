@@ -154,6 +154,7 @@
     <None Include="debug_quad.vs" />
     <None Include="debug_quad_depth.fs" />
     <None Include="dev.stl" />
+    <None Include="ico1.stl" />
     <None Include="Katie.stl" />
     <None Include="point_shadows_depth.fs" />
     <None Include="point_shadows_depth.gs" />

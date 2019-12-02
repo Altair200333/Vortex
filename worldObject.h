@@ -12,10 +12,12 @@
 typedef struct _RigidBody
 {
 	vec3 lineralVel;
-	vec3 angularVel;
-	vec3 torgPoint;
-	vec3 lastAcceleration;
 	vec3 acceleration;
+	float mass;
+	float theta;
+	float omega;
+	float alpha;
+	float J;
 }RigidBody;
 typedef struct
 {

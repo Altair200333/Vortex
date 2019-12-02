@@ -106,10 +106,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	posY1 = ypos;
 }
 
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-void renderQuad()
+
+void renderQuad(vec3 start, vec3 end)
 {
+	unsigned int quadVAO = 0;
+	unsigned int quadVBO;
 	if (quadVAO == 0)
 	{
 		float quadVertices[] = {
@@ -149,7 +150,7 @@ void initLights(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, Lig
 	*ls = generateDirectionalLight(
 		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
 		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f },
-		(vec3){ 0.5f, 0.5f, 0.5f }, 0.41f);
+		(vec3){ 0.5f, 0.5f, 0.5f }, 0.71f);
 
 	*ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 
 	                         1.0f, 0.09, 0.032,
@@ -201,13 +202,14 @@ int main()
 		{2.0f,  5.0f, -15.0f},
 		{-1.5f, -2.2f, -2.5f},
 		{-3.8f, -2.0f, -12.3f},
-		{2.4f, -0.1f, -3.5f},
-		{-1.7f,  3.0f, -7.5f},
-		{1.3f, -2.0f, -2.5f},
+		{2.4f, 5.0f, -3.5f},
+		{-1.7f,  -1.0f, -7.5f},
+		{-1.7f, 1.0f, -7.5f},
 		{1.5f,  2.0f, -2.5f},
 		{1.5f,  0.2f, -1.5f},
 		{-1.3f,  1.0f, -1.5f}
 	};
+	
 	vec3 pointLightPositions[] = {
 		{lightPos[0], lightPos[1], lightPos[2]},
 		{2.3f, -3.3f, -4.0f},
@@ -250,10 +252,12 @@ int main()
 	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
 	
 	appendObject(&list, fromStlFile("cage.stl"));
-	appendObject(&list, fromStlFile("ico.stl"));
-	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
-
-
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, 2, -1 });
+	//list.objects[list.count - 1].rigidBody.lineralVel[1] = -0.01;
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, -2, -1 });
+	
 	LightSource* ls;
 	LightSource* ps;
 	LightSource* ps2;
@@ -299,8 +303,9 @@ int main()
 	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
 	rotateAxis(&(list.objects[3]), 45.0, (vec3) { 0,1, 0 });
 	
-	rotateAxis(&(list.objects[5]), 45.0, (vec3) { 1,0, 0 });
+	//rotateAxis(&(list.objects[5]), 45.0, (vec3) { 1,0, 0 });
 	//rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
+	list.objects[6].rigidBody.lineralVel[1] = -0.01;
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
@@ -341,7 +346,8 @@ int main()
 		translateGlobal(&(list.objects[3]), (vec3) { 0, 0.005, 0 });
 
 
-		computeCubeFall((Object*[]){ &(list.objects[4]), &(list.objects[5])}, 2, deltaTime);
+		computeCubeFall((Object*[]){  &(list.objects[4])}, 1, deltaTime);
+		computeSomething((Object*[]){  &(list.objects[15]), &(list.objects[14])}, 2, deltaTime);
 		//rotateAxis(&(objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
 		renderListObjects(&list);
 		
@@ -349,7 +355,7 @@ int main()
 		renderListObjects(&lightList);
 
 		glBindVertexArray(0);
-
+		renderQuad(0,0);
 		//End Draw Calls
 		glfwSwapBuffers(window);
 	}
