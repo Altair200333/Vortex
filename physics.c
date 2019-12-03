@@ -3,6 +3,7 @@
 #include <math.h>
 #include "gizmos.h"
 #include "vector3.h"
+#include "../deps/linmath.h"
 //Every collision creates counteracting impulse applying to body
 void computeCubeFall(Object* obj[], size_t count, float deltaTime)
 {
@@ -44,10 +45,27 @@ void computeCubeFall(Object* obj[], size_t count, float deltaTime)
 
 void collideObj(Object* obj, Vector3 normal)
 {
+
+	//Here is the biggest part - reflection of normal component of the speed
+	//1.8 is bounciness - it should be set in rigid body properties
 	obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel,
 		vmul(normal,
-			fabs(1.6*dot(normal, obj->rigidBody.lineralVel) / sqMagnitude(normal))));
+			fabs(1.8*dot(normal, obj->rigidBody.lineralVel) / sqMagnitude(normal))));
+	float dotp = dot(obj->rigidBody.lineralVel, normal);
+	float frC = dotp * dotp / sqMagnitude(obj->rigidBody.lineralVel) / sqMagnitude(normal);
+	float sina;
+	frC >= 1 ? (sina = 0) : (sina = sqrt(1 - frC));
 
+	//that's the angular speed - cross product of speed and normalized offset direction
+	//means the component of speed that's perpendicular to normal
+	Vector3 cr = cross(obj->rigidBody.lineralVel, normalized(normal));
+
+	//kind'a the same stuff is friction, actually it's wrong approach for friction setup, i should rely on delta time, not only speed and angles
+	obj->rigidBody.lineralVel = vmul(obj->rigidBody.lineralVel, 1 - frC/10);
+	
+	obj->rigidBody.angluarVel = vmul(cr,-1);//sub(obj->rigidBody.lineralVel, cr);
+
+	//shift to avoid being inside object
 	translateGlobalV3(obj, vmul(normal, 1));
 }
 
@@ -64,7 +82,7 @@ Vector3 collide(int ind, Object* obj[], size_t count)
 		if (i != ind)
 		{
 			Vector3 diff = sub(vecToVector(obj[ind]->position), vecToVector(obj[i]->position));
-			if (sqMagnitude(diff) <= 1)
+			if (sqMagnitude(diff) < 1)
 			{
 				Vector3 rad = vmul(normalized(diff), 0.5f);
 				Vector3 x = sub(diff, rad);
@@ -85,19 +103,62 @@ void computeSomething(Object* obj[], size_t count, float deltaTime)
 	
 	vec3 Force = { 0, -9.8f, 0 };
 	float floorHeight = -3;
-	float treshold = 0.001;
-	
+
+	//min possible squared angular speed
+	float treshold = 0.0001;
+	//printf("%f\n", 1/deltaTime);
 	for (int i = 0; i < count; i++)
 	{
-		obj[i]->rigidBody.angluarVel.axis[1] = 0.4;
-		if(sqMagnitude(obj[i]->rigidBody.angluarVel)>0.5f)
+		
+		if(sqMagnitude(obj[i]->rigidBody.angluarVel)> treshold)
 			rotateAxisV3(obj[i], magnitude(obj[i]->rigidBody.angluarVel), obj[i]->rigidBody.angluarVel);
+		
 		Vector3 normal = collide(i, obj, count);
 		
-		Vector3 force = { 0,-9.8, 0 };
-		obj[i]->rigidBody.lineralVel = add(obj[i]->rigidBody.lineralVel, vmul(force, deltaTime/10));
+		Vector3 force = { 0,-3.8, 0 };
+		force = sub(force, vmul(obj[i]->rigidBody.lineralVel,0.6));
+		obj[i]->rigidBody.lineralVel = add(obj[i]->rigidBody.lineralVel, vmul(force, deltaTime/3/ obj[i]->rigidBody.mass));
 		gizmosDrawLineV3(vecToVector(obj[i]->position), add(vecToVector(obj[i]->position), obj[i]->rigidBody.lineralVel));
 		translateGlobalV3(obj[i], vmul(obj[i]->rigidBody.lineralVel, deltaTime));
 	}
 
+}
+
+void addObjectToWorld(RigidBodyWorld* rw, Object* obj)
+{
+	if(rw->items == NULL)
+	{
+		rw->items = malloc(sizeof(Object*) * 100);
+		if (rw->items == NULL)
+		{
+			printf("failed to allocate memory");
+			return;
+		}
+		rw->capacity = 100;
+		rw->size = 0;
+	}
+	if(rw->size == rw->capacity)
+	{
+		Object** newO = realloc(rw->items, sizeof(Object*) * (rw->capacity*2));
+		if (newO == NULL)
+		{
+			printf("failed to allocate memory");
+			return;
+		}
+		free(rw->items);
+		rw->items = newO;
+		rw->capacity *= 2;
+	}
+	rw->items[rw->size] = obj;
+	rw->size++;
+}
+void updatePhysicsWorld(RigidBodyWorld* rw, float deltaTime)
+{
+	computeSomething(rw->items, rw->size, deltaTime);
+}
+void RigidBodyWorldInit(RigidBodyWorld* rw)
+{
+	rw->items = 0;
+	rw->capacity = 0;
+	rw->items = NULL;
 }

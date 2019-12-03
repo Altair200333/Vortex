@@ -105,6 +105,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	posX1 = xpos;
 	posY1 = ypos;
+
+	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		printf("AHTUNG!");
+	}
 }
 
 
@@ -177,14 +182,23 @@ void initLights(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, Lig
 	                          (vec3) { 1.0f, 1.0f, 1.0f });
 }
 
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+	{
+		printf("AAAA\n");
+	
 
+		
+	}
+}
 int main()
 {
 	GLFWwindow* window = initWindow(windowWidth, windowHeight);
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	unsigned long counter = 1;
 
 	glEnable(GL_MULTISAMPLE);
@@ -192,7 +206,8 @@ int main()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	glEnable(GL_DEPTH_TEST);
-
+	
+	
 	standartShader = makeShader("vertexSh1.vs", "fragmentSh.fs");
 	Shader* lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
 
@@ -257,10 +272,16 @@ int main()
 	
 	appendObject(&list, fromStlFile("cage.stl"));
 	appendObject(&list, fromStlFile("ico1.stl"));
-	translateGlobal(&list.objects[list.count - 1], (vec3) { -2.5, 1, -1 });
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -2.5, 3, -1.2 });
 	//list.objects[list.count - 1].rigidBody.lineralVel[1] = -0.01;
 	appendObject(&list, fromStlFile("ico1.stl"));
-	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, -2, -1 });
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, 0, -1 });
+
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -3.5, 5, -1 });
+
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -4, 6, -1 });
 	
 	LightSource* ls;
 	LightSource* ps;
@@ -310,6 +331,13 @@ int main()
 	//rotateAxis(&(list.objects[5]), 45.0, (vec3) { 1,0, 0 });
 	//rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
 	list.objects[6].rigidBody.lineralVel.axis[1] = -0.01;
+
+	RigidBodyWorld rw;
+	RigidBodyWorldInit(&rw);
+	addObjectToWorld(&rw, &(list.objects[14]));
+	addObjectToWorld(&rw, &(list.objects[15]));
+	addObjectToWorld(&rw, &(list.objects[16]));
+	addObjectToWorld(&rw, &(list.objects[17]));
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
@@ -321,6 +349,8 @@ int main()
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearStencil(0); // this is the default value
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		//--DRAW
 		movePlayer(window);
 		recalculate(&pl);
@@ -351,7 +381,8 @@ int main()
 
 
 		computeCubeFall((Object*[]){  &(list.objects[4])}, 1, deltaTime);
-		computeSomething((Object*[]){  &(list.objects[15]), &(list.objects[14])}, 2, deltaTime);
+		//computeSomething((Object*[]){  &(list.objects[15]), &(list.objects[14]), &(list.objects[16]), &(list.objects[17])}, 4, deltaTime);
+		updatePhysicsWorld(&rw, deltaTime);
 		//rotateAxis(&(objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
 		renderListObjects(&list);
 		
@@ -361,6 +392,13 @@ int main()
 		glBindVertexArray(0);
 		gizmosDrawLine((vec3){1,1,1}, (vec3) { 0, 0, 0 });
 		gizmosDrawLine((vec3){1,1,5}, (vec3) { 1, 0, 0 });
+
+		glEnable(GL_STENCIL_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		for (int i = 0; i < 10; i++) {
+			glStencilFunc(GL_ALWAYS, i + 1, -1);
+			//draw_object(i);
+		}
 		//End Draw Calls
 		glfwSwapBuffers(window);
 	}
