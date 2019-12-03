@@ -5,13 +5,16 @@
 #include "worldObject.h"
 #include "renderManager.h"
 #include <string.h>
+#include "vector3.h"
 
 void initRigidBody(Object* obj)
 {
 	for (int i = 0; i < 3; i++)
-		obj->rigidBody.acceleration[i] = 0;
+		obj->rigidBody.angluarVel.axis[i] = 0;
 	for (int i = 0; i < 3; i++)
-		obj->rigidBody.lineralVel[i] = 0;
+		obj->rigidBody.acceleration.axis[i] = 0;
+	for (int i = 0; i < 3; i++)
+		obj->rigidBody.lineralVel.axis[i] = 0;
 	obj->rigidBody.mass = 1;
 	obj->rigidBody.alpha = 0;
 	obj->rigidBody.theta = 0;
@@ -93,21 +96,44 @@ Object generateCube(float scale)
 	obj.render = &renderObjectStandart;
 	return obj;
 }
+void rotateAxisV3(Object* obj, float angle, Vector3 axis)
+{
+	vec3 shift3;
+	VectorToVec(axis, shift3);
+	rotateAxis(obj, angle, shift3);
+}
 void rotateAxis(Object* obj, float angle, vec3 axis)
 {
-	//glm_translate(obj->model, (vec3){-obj->location[0], -obj->location[1], -obj->location[2]});
+	//current rotation in euler angles
+	vec3 rot;
+	glm_euler_angles(obj->model, rot);
 
+	//matrix of current transform(rotation), is used to set rotation back to original
+	mat4 mat;
+	//inverse rotation matrix
+	mat4 mat1;
+	//get matrix
+	glm_euler(rot, mat);
+	//inverse it
+	//this operation seems to be CPU expensive, should find more optimised solution
+	glm_mat4_inv(mat, mat1);
+
+	//rotate it in order to set object to default rotation with saving position and scale	
+	glm_mat4_mul(obj->model, mat1, obj->model);
 	glm_rotate(obj->model, 3.1415926 / 180 * angle, axis);
-	glm_euler_angles(obj->model, obj->rotation);
 	//glm_translate(obj->model, obj->location);
+	glm_mat4_mul(obj->model, mat, obj->model);
 }
 
-
+void rotateLocal(Object* obj, float angle, vec3 axis)
+{
+	glm_rotate(obj->model, 3.1415926 / 180 * angle, axis);
+}
 void translateLocal(Object* obj, vec3 shift)
 {
 	glm_translate(obj->model,
 		shift);
-	glm_vec3_add(obj->location, shift, obj->location);
+	glm_vec3_add(obj->position, shift, obj->position);
 	
 }
 
@@ -137,9 +163,14 @@ void translateGlobal(Object* obj, vec3 shift)
 	glm_mat4_mul(obj->model, mat, obj->model);
 	
 	//update position field
-	glm_vec3_add(obj->location, shift, obj->location);
+	glm_vec3_add(obj->position, shift, obj->position);
 }
-
+void translateGlobalV3(Object* obj, Vector3 shift)
+{
+	vec3 shift3;
+	VectorToVec(shift, shift3);
+	translateGlobal(obj, shift3);
+}
 void setShader(Object* obj, Shader* shader)
 {
 	if (shader == NULL)
@@ -305,15 +336,15 @@ Object fromStlFile(char* name)
 void setPos(Object* obj, vec3 axis)
 {
 	glm_translate(obj->model, 
-		(vec3) {-obj->location[0],-obj->location[1], -obj->location[2]});
+		(vec3) {-obj->position[0],-obj->position[1], -obj->position[2]});
 
 	glm_translate(obj->model,
 		(vec3) {
 		axis[0], axis[1], axis[2]
 	});
-	obj->location[0] = axis[0];
-	obj->location[1] = axis[1];
-	obj->location[2] = axis[2];
+	obj->position[0] = axis[0];
+	obj->position[1] = axis[1];
+	obj->position[2] = axis[2];
 }
 void appendObject(ListObjects* o, Object obj)
 {

@@ -22,6 +22,7 @@
 #include "lightSource.h"
 #include "Scene.h"
 #include "physics.h"
+#include "gizmos.h"
 
 bool EdgeViewMode = false;
 Player pl;
@@ -131,10 +132,13 @@ void renderQuad(vec3 start, vec3 end)
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	}
+	
 	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_LINES, 0, 4);
 	glBindVertexArray(0);
 }
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	// make sure the viewport matches the new window dimensions; note that width and 
@@ -253,7 +257,7 @@ int main()
 	
 	appendObject(&list, fromStlFile("cage.stl"));
 	appendObject(&list, fromStlFile("ico1.stl"));
-	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, 2, -1 });
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -2.5, 1, -1 });
 	//list.objects[list.count - 1].rigidBody.lineralVel[1] = -0.01;
 	appendObject(&list, fromStlFile("ico1.stl"));
 	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, -2, -1 });
@@ -305,7 +309,7 @@ int main()
 	
 	//rotateAxis(&(list.objects[5]), 45.0, (vec3) { 1,0, 0 });
 	//rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
-	list.objects[6].rigidBody.lineralVel[1] = -0.01;
+	list.objects[6].rigidBody.lineralVel.axis[1] = -0.01;
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
@@ -355,7 +359,8 @@ int main()
 		renderListObjects(&lightList);
 
 		glBindVertexArray(0);
-		renderQuad(0,0);
+		gizmosDrawLine((vec3){1,1,1}, (vec3) { 0, 0, 0 });
+		gizmosDrawLine((vec3){1,1,5}, (vec3) { 1, 0, 0 });
 		//End Draw Calls
 		glfwSwapBuffers(window);
 	}
