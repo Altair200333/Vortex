@@ -60,11 +60,17 @@
     <ClCompile Include="Scene.c">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
+    <ClCompile Include="physics.c">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="gizmos.c">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="vector3.c">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="old1.txt">
-      <Filter>Файлы ресурсов</Filter>
-    </Text>
     <Text Include="fragmentSh.fs">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </Text>
@@ -95,6 +101,15 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="physics.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="gizmos.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="vector3.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
@@ -145,6 +160,9 @@
       <Filter>Файлы ресурсов\Models\STL</Filter>
     </None>
     <None Include="Katie.stl">
+      <Filter>Файлы ресурсов\Models\STL</Filter>
+    </None>
+    <None Include="ico1.stl">
       <Filter>Файлы ресурсов\Models\STL</Filter>
     </None>
   </ItemGroup>

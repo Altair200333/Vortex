@@ -82,6 +82,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>freetype.lib;opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>NotSet</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -122,27 +123,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="baseShader.c" />
+    <ClCompile Include="gizmos.c" />
     <ClCompile Include="lightSource.c" />
+    <ClCompile Include="physics.c" />
     <ClCompile Include="Player.c" />
     <ClCompile Include="renderManager.c" />
     <ClCompile Include="Scene.c" />
     <ClCompile Include="start1.c" />
     <ClCompile Include="textType.c" />
+    <ClCompile Include="vector3.c" />
     <ClCompile Include="worldObject.c" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragmentSh.fs" />
     <Text Include="lightFragmentShader.fs" />
     <Text Include="lightVertexShader.vs" />
-    <Text Include="old1.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="baseShader.h" />
+    <ClInclude Include="gizmos.h" />
     <ClInclude Include="lightSource.h" />
+    <ClInclude Include="physics.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="renderManager.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="textType.h" />
+    <ClInclude Include="vector3.h" />
     <ClInclude Include="worldObject.h" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +158,7 @@
     <None Include="debug_quad.vs" />
     <None Include="debug_quad_depth.fs" />
     <None Include="dev.stl" />
+    <None Include="ico1.stl" />
     <None Include="Katie.stl" />
     <None Include="point_shadows_depth.fs" />
     <None Include="point_shadows_depth.gs" />

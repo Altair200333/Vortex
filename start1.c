@@ -20,6 +20,9 @@
 #include "Player.h"
 #include "textType.h"
 #include "lightSource.h"
+#include "Scene.h"
+#include "physics.h"
+#include "gizmos.h"
 
 bool EdgeViewMode = false;
 Player pl;
@@ -49,7 +52,25 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	
 }
+ListObjects list = { NULL, 0 };
+RigidBodyWorld rw;
 //move player every frame(calback sucks)
+bool down = false, Rdown = false;
+
+void addObject(Vector3 pos)
+{
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobalV3(&list.objects[list.count - 1], pos);
+	addObjectToWorld(&rw, &(list.objects[list.count - 1]));
+}
+void addObjectVel(Vector3 pos, Vector3 initVel)
+{
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobalV3(&list.objects[list.count - 1], pos);
+	addObjectToWorld(&rw, &(list.objects[list.count - 1]));
+	for (int i = 0; i < 3; i++)
+		list.objects[list.count - 1].rigidBody.lineralVel.axis[i] = initVel.axis[i];
+}
 void movePlayer(GLFWwindow* window)
 {
 	float speed = Fspeed * deltaTime;
@@ -82,6 +103,29 @@ void movePlayer(GLFWwindow* window)
 	{
 		translateM(&pl, pl.up, -speed);
 	}
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !down)
+	{
+		down = true;
+		printf("Down\n");
+
+		pl.selection = castRay(vecToVector(pl.eye), vecToVector(pl.dir), &rw);
+	}
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && down)
+	{
+		down = false;
+		//printf("B\n");
+	}
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !Rdown)
+	{
+		Rdown = true;
+
+		pl.selection = NULL;
+	}
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && Rdown)
+	{
+		Rdown = false;
+		//printf("B\n");
+	}
 }
 //drag mouse
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -102,12 +146,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	posX1 = xpos;
 	posY1 = ypos;
+
+	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		printf("AHTUNG!");
+	}
 }
 
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-void renderQuad()
+
+void renderQuad(vec3 start, vec3 end)
 {
+	unsigned int quadVAO = 0;
+	unsigned int quadVBO;
 	if (quadVAO == 0)
 	{
 		float quadVertices[] = {
@@ -128,10 +178,13 @@ void renderQuad()
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	}
+	
 	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_LINES, 0, 4);
 	glBindVertexArray(0);
 }
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	// make sure the viewport matches the new window dimensions; note that width and 
@@ -140,24 +193,41 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 
-void computeBouncingBall_T(Object smallIco, vec3 curPos, vec3 velocity)
+
+
+void initLights(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, LightSource** ps, LightSource** ps2, LightSource** ps3)
 {
-	if(velocity[1] <0 && curPos[1]<-2 || velocity[1] > 0 && curPos[1]>0 )
-	{
-		velocity[1] *= -1;
-	}
-	if (velocity[0]<0 && curPos[0] < -6 || velocity[0]>0 && curPos[0]>-4)
-	{
-		velocity[0] *= -1;
-	}
-	if (velocity[2] < 0 && curPos[2] < -5 || velocity[2]>0 && curPos[2]>-3)
-	{
-		velocity[2] *= -1;
-	}
-	glm_vec3_add(curPos, (vec3) { velocity[0]*deltaTime, velocity[1] * deltaTime,
-		             velocity[2] * deltaTime}, curPos);
-		
-	setPos(&smallIco, curPos);
+	*ls = generateDirectionalLight(
+		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
+		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f },
+		(vec3){ 0.5f, 0.5f, 0.5f }, 0.71f);
+
+	*ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 
+	                         1.0f, 0.09, 0.032,
+	                         (vec3) { 0.05f, 0.05f, 0.05f },
+	                         (vec3) { 0.8f, 0.8f, 0.8f },
+	                         (vec3) { 1.0f, 1.0f, 1.0f });
+
+	*ps2 = generatePointLight((vec3) { pointLightPositions[1][0],
+		                          pointLightPositions[1][1],
+		                          pointLightPositions[1][2] }, 1.0f, 0.09, 0.032,
+	                          (vec3) {0.05f, 0.05f, 0.05f}, 
+	                          (vec3) { 0.8f, 0.8f, 0.8f },
+	                          (vec3) { 1.0f, 1.0f, 1.0f });
+
+	*ps3 = generatePointLight((vec3) { pointLightPositions[2][0],
+		                          pointLightPositions[2][1],
+		                          pointLightPositions[2][2] }, 1.0f, 0.09, 0.032,
+	                          (vec3) {0.05f, 0.05f, 0.05f}, 
+	                          (vec3) { 0.8f, 0.9f, 0.8f },
+	                          (vec3) { 1.0f, 1.0f, 1.0f });
+}
+
+
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	
 }
 
 int main()
@@ -166,7 +236,7 @@ int main()
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	unsigned long counter = 1;
 
 	glEnable(GL_MULTISAMPLE);
@@ -174,7 +244,8 @@ int main()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	glEnable(GL_DEPTH_TEST);
-
+	
+	
 	standartShader = makeShader("vertexSh1.vs", "fragmentSh.fs");
 	Shader* lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
 
@@ -188,13 +259,14 @@ int main()
 		{2.0f,  5.0f, -15.0f},
 		{-1.5f, -2.2f, -2.5f},
 		{-3.8f, -2.0f, -12.3f},
-		{2.4f, -0.4f, -3.5f},
-		{-1.7f,  3.0f, -7.5f},
-		{1.3f, -2.0f, -2.5f},
+		{2.4f, 5.0f, -3.5f},
+		{-1.7f,  -1.0f, -7.5f},
+		{-1.7f, 1.0f, -7.5f},
 		{1.5f,  2.0f, -2.5f},
 		{1.5f,  0.2f, -1.5f},
 		{-1.3f,  1.0f, -1.5f}
 	};
+	
 	vec3 pointLightPositions[] = {
 		{lightPos[0], lightPos[1], lightPos[2]},
 		{2.3f, -3.3f, -4.0f},
@@ -203,14 +275,12 @@ int main()
 	pl = initPlayer(45, windowWidth, windowHeight);
 
 	//glEnable(GL_CULL_FACE);
-	
-	
-	ListObjects list={NULL, 0};
 
 	for (unsigned int i = 0; i < 9; i++)
 	{
 		appendObject(&list, generateCube(1));
-		glm_translate(list.objects[i].model, cubePositions[i]);
+		translateGlobal(&(list.objects[i]), cubePositions[i]);
+		//glm_translate(list.objects[i].model, cubePositions[i]);
 	}
 
 	Object lightModels[3];
@@ -222,7 +292,8 @@ int main()
 		//glm_scale(lightModels[i].model, (vec3) { 0.3, 0.3, 0.3 });
 		setShader(&(lightModels[i]), lightShader);
 	}
-
+	RigidBodyWorldInit(&rw);
+	
 	appendObject(&list,  generatePlane(1));
 	glm_translate(list.objects[list.count-1].model, (vec3) { 2, -4.0f, -2 });
 	glm_scale(list.objects[list.count - 1].model, (vec3) { 200.0f, 1.0f, 200.0f });
@@ -236,37 +307,29 @@ int main()
 	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
 	
 	appendObject(&list, fromStlFile("cage.stl"));
-	appendObject(&list, fromStlFile("ico.stl"));
-	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
-	
-	
-	LightSource* ls = generateDirectionalLight(
-		(vec3){ -lightPos[0], -lightPos[1], -lightPos[2] },
-		(vec3){ 0.05f, 0.05f, 0.05f }, (vec3){ 0.4f, 0.4f, 0.4f },
-		(vec3){ 0.5f, 0.5f, 0.5f }, 0.11f);
-	
-	LightSource* ps = generatePointLight((vec3){ lightPos[0], lightPos[1], lightPos[2] }, 
-		1.0f, 0.09, 0.032,
-		(vec3) { 0.05f, 0.05f, 0.05f },
-		(vec3) { 0.8f, 0.8f, 0.8f },
-		(vec3) { 1.0f, 1.0f, 1.0f });
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -2.5, 3, -1.2 });
+	//list.objects[list.count - 1].rigidBody.lineralVel[1] = -0.01;
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, 0, -1 });
 
-	LightSource* ps2 = generatePointLight((vec3) { pointLightPositions[1][0],
-		pointLightPositions[1][1],
-		pointLightPositions[1][2] }, 1.0f, 0.09, 0.032,
-		(vec3) {0.05f, 0.05f, 0.05f}, 
-		(vec3) { 0.8f, 0.8f, 0.8f },
-		(vec3) { 1.0f, 1.0f, 1.0f });
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -3.5, 5, -1 });
 
-	LightSource* ps3 = generatePointLight((vec3) { pointLightPositions[2][0],
-		pointLightPositions[2][1],
-		pointLightPositions[2][2] }, 1.0f, 0.09, 0.032,
-		(vec3) {0.05f, 0.05f, 0.05f}, 
-		(vec3) { 0.8f, 0.9f, 0.8f },
-		(vec3) { 1.0f, 1.0f, 1.0f });
+	appendObject(&list, fromStlFile("ico1.stl"));
+	translateGlobal(&list.objects[list.count - 1], (vec3) { -4.4, 6, -1 });
+	
+	addObject((Vector3) { -4, 7, -1 });
+	addObjectVel((Vector3) { -4, 9, -1.1 }, (Vector3){0,0,1});
+	addObjectVel((Vector3) { -3, 9, -1.1 }, (Vector3){1,0,-1});
+	
+	LightSource* ls;
+	LightSource* ps;
+	LightSource* ps2;
+	LightSource* ps3;
+	initLights(lightPos, pointLightPositions, &ls, &ps, &ps2, &ps3);
 
 
-	
 	SpotLight sli = { 
 	{0, 2, -4},
 	{0,-1,0},
@@ -298,21 +361,35 @@ int main()
 		appendLigthSource(&ll, *(lights[i]));
 	}
 	
-	vec3 curPos = { list.objects[12].location[0], list.objects[12].location[1],list.objects[12].location[2] };
-	vec3 velocity = { -1, -1.5, 2 };
-	vec3 grav = { 0, -9.8f, 0 };
+	Scene scene;
+	scene.sceneObjects = list;
+	scene.lights = ll;
+	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 0,0, 1 });
+	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
+	rotateAxis(&(list.objects[3]), 45.0, (vec3) { 0,1, 0 });
 	
+	//rotateAxis(&(list.objects[5]), 45.0, (vec3) { 1,0, 0 });
+	//rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
+	list.objects[6].rigidBody.lineralVel.axis[1] = -0.01;
+
+	
+	addObjectToWorld(&rw, &(list.objects[14]));
+	addObjectToWorld(&rw, &(list.objects[15]));
+	addObjectToWorld(&rw, &(list.objects[16]));
+	addObjectToWorld(&rw, &(list.objects[17]));
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		
-		printf("%f\n", deltaTime);
+		//printf("%f\n", deltaTime);
 		
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearStencil(0); // this is the default value
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		//--DRAW
 		movePlayer(window);
 		recalculate(&pl);
@@ -328,10 +405,7 @@ int main()
 		setProjectionView(&pl, lightShader);
 		setProjectionView(&pl, standartShader);
 
-		//--
-
-		computeBouncingBall_T(list.objects[12], curPos, velocity);
-		
+		//--		
 		
 		setVec3( standartShader, "lightPos", 
 			((PointLight*)(ps->lightSrc))->position[0],
@@ -340,7 +414,14 @@ int main()
 
 		
 		renderListLights(standartShader, &ll);
-		rotateAxis(&(list.objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
+		
+		rotateAxis(&(list.objects[3]), 20*deltaTime, (vec3) { 0, 1, 0 });
+		translateGlobal(&(list.objects[3]), (vec3) { 0, 0.005, 0 });
+
+
+		computeCubeFall((Object*[]){  &(list.objects[4])}, 1, deltaTime);
+		//computeSomething((Object*[]){  &(list.objects[15]), &(list.objects[14]), &(list.objects[16]), &(list.objects[17])}, 4, deltaTime);
+		updatePhysicsWorld(&rw, deltaTime);
 		//rotateAxis(&(objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
 		renderListObjects(&list);
 		
@@ -349,6 +430,17 @@ int main()
 
 		glBindVertexArray(0);
 
+		if(pl.selection!=NULL)
+		{
+			gizmosDrawLineV3(vecToVector(pl.selection->position), add(vecToVector(pl.selection->position), (Vector3) { 0, 1, 0 }));
+			Vector3 diff = sub(vecToVector(pl.selection->position), vecToVector(pl.eye));
+			float dst = magnitude(diff);
+			Vector3 ldir = vmul(normalized((vecToVector(pl.dir))), dst);
+			
+			Vector3 trgt = sub(ldir, diff);
+			gizmosDrawLineV3(vecToVector(pl.selection->position), add(vecToVector(pl.selection->position), trgt));
+			pl.selection->rigidBody.lineralVel = add(pl.selection->rigidBody.lineralVel, vmul(trgt, 0.01));
+		}
 		//End Draw Calls
 		glfwSwapBuffers(window);
 	}

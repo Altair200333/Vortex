@@ -7,6 +7,7 @@
 #include <cglm/cglm.h>
 #include <cglm/mat4.h>
 #include <cglm/types.h>
+#include "worldObject.h"
 
 typedef struct {
 	mat4 projection;
@@ -15,6 +16,7 @@ typedef struct {
 	vec3 dir;
 	vec3 up;
 	float fov;
+	Object* selection;
 }Player;
 
 Player initPlayer(float fov, int w, int h);
