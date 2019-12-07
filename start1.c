@@ -23,6 +23,7 @@
 #include "Scene.h"
 #include "physics.h"
 #include "gizmos.h"
+#include "level0.h"
 
 bool EdgeViewMode = false;
 Player pl;
@@ -31,13 +32,22 @@ float Fspeed = 5;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+float timeScale = 1.0f;
+
 //Куда продавать душу за перегрузки и наследование?
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	// Когда пользователь нажимает ESC, мы устанавливаем свойство WindowShouldClose в true, 
 	// и приложение после этого закроется	
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		if(timeScale == 0)
+			timeScale = 1;
+		else timeScale = 0;
+	}
+	
 	if (key == GLFW_KEY_Z && action == GLFW_RELEASE)
 	{
 		EdgeViewMode = !EdgeViewMode;
@@ -114,12 +124,13 @@ void movePlayer(GLFWwindow* window)
 	{
 		down = false;
 		//printf("B\n");
+		pl.selection = NULL;
+
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !Rdown)
 	{
 		Rdown = true;
 
-		pl.selection = NULL;
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && Rdown)
 	{
@@ -147,10 +158,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	posX1 = xpos;
 	posY1 = ypos;
 
-	if (glfwGetKey(window, GLFW_MOUSE_BUTTON_RIGHT))
-	{
-		printf("AHTUNG!");
-	}
 }
 
 
@@ -245,6 +252,8 @@ int main()
 	
 	glEnable(GL_DEPTH_TEST);
 	
+	Scene scene;
+	initScene(&scene, onUpdate, onStart);
 	
 	standartShader = makeShader("vertexSh1.vs", "fragmentSh.fs");
 	Shader* lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
@@ -361,9 +370,7 @@ int main()
 		appendLigthSource(&ll, *(lights[i]));
 	}
 	
-	Scene scene;
-	scene.sceneObjects = list;
-	scene.lights = ll;
+	
 	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 0,0, 1 });
 	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
 	rotateAxis(&(list.objects[3]), 45.0, (vec3) { 0,1, 0 });
@@ -377,10 +384,12 @@ int main()
 	addObjectToWorld(&rw, &(list.objects[15]));
 	addObjectToWorld(&rw, &(list.objects[16]));
 	addObjectToWorld(&rw, &(list.objects[17]));
+
+	scene.onStart(scene);
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
+		deltaTime = (currentFrame - lastFrame)*timeScale;
 		lastFrame = currentFrame;
 		
 		//printf("%f\n", deltaTime);
@@ -396,6 +405,7 @@ int main()
 		
 		//----------------
 		//================= Calc shadows
+		scene.onUpdate(scene);
 		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 1*deltaTime,
 			(vec3) { 0, 1, 0 });
 		setPos(&(lightList.objects[0]), ((PointLight*)(ps->lightSrc))->position);
@@ -432,7 +442,7 @@ int main()
 
 		if(pl.selection!=NULL)
 		{
-			gizmosDrawLineV3(vecToVector(pl.selection->position), add(vecToVector(pl.selection->position), (Vector3) { 0, 1, 0 }));
+			//gizmosDrawLineV3(vecToVector(pl.selection->position), add(vecToVector(pl.selection->position), (Vector3) { 0, 1, 0 }));
 			Vector3 diff = sub(vecToVector(pl.selection->position), vecToVector(pl.eye));
 			float dst = magnitude(diff);
 			Vector3 ldir = vmul(normalized((vecToVector(pl.dir))), dst);

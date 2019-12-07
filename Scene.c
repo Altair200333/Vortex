@@ -1,6 +1,7 @@
 #include "Scene.h"
 
-void procceedScene(Scene* scene)
+void initScene(Scene* scene, void(*onUpdate)(Scene), void(*onStart)(Scene))
 {
-	
+	scene->onStart = onStart;
+	scene->onUpdate= onUpdate;
 }

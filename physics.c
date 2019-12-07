@@ -51,6 +51,7 @@ void collideObj(Object* obj, Vector3 normal)
 	obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel,
 		vmul(normal,
 			fabs(1.8*dot(normal, obj->rigidBody.lineralVel) / sqMagnitude(normal))));
+	
 	float dotp = dot(obj->rigidBody.lineralVel, normal);
 	float frC = dotp * dotp / sqMagnitude(obj->rigidBody.lineralVel) / sqMagnitude(normal);
 	float sina;
@@ -63,7 +64,7 @@ void collideObj(Object* obj, Vector3 normal)
 	//kind'a the same stuff is friction, actually it's wrong approach for friction setup, i should rely on delta time, not only speed and angles
 	obj->rigidBody.lineralVel = vmul(obj->rigidBody.lineralVel, 1 - frC/10);
 	
-	obj->rigidBody.angluarVel = vmul(cr,-0.5);//sub(obj->rigidBody.lineralVel, cr);
+	obj->rigidBody.angluarVel = vmul(cr,-1);
 
 	//shift to avoid being inside object
 	translateGlobalV3(obj, vmul(normal, 1));
@@ -75,14 +76,13 @@ Vector3 collide(int ind, Object* obj[], size_t count)
 	if (obj[ind]->position[1] < floorHeight)
 	{
 		collideObj(obj[ind], (Vector3) { 0, floorHeight - obj[ind]->position[1], 0 });
-		return (Vector3) { 0, floorHeight- obj[ind]->position[1],0};
 	}
 	for (int i = ind; i < count; i++)
 	{
 		if (i != ind)
 		{
 			Vector3 diff = sub(vecToVector(obj[ind]->position), vecToVector(obj[i]->position));
-			if (sqMagnitude(diff) < 1)
+			if (sqMagnitude(diff) <= 1)
 			{
 				Vector3 rad = vmul(normalized(diff), 0.5f);
 				Vector3 x = sub(diff, rad);
@@ -90,7 +90,6 @@ Vector3 collide(int ind, Object* obj[], size_t count)
 				//gizmosDrawLineV3(vecToVector(obj[ind]->position), add(vecToVector(obj[ind]->position), diff));
 				collideObj(obj[ind], diff);
 				collideObj(obj[i], vmul(diff,-1));
-				return diff;
 			}
 		}
 	}
@@ -105,17 +104,17 @@ void computeSomething(Object* obj[], size_t count, float deltaTime)
 	float floorHeight = -3;
 
 	//min possible squared angular speed
-	float treshold = 0.0001;
+	float treshold = 0.00001;
 	//printf("%f\n", 1/deltaTime);
 	for (int i = 0; i < count; i++)
 	{
 		
 		if(sqMagnitude(obj[i]->rigidBody.angluarVel)> treshold)
-			rotateAxisV3(obj[i], magnitude(obj[i]->rigidBody.angluarVel), obj[i]->rigidBody.angluarVel);
+			rotateAxisV3(obj[i], magnitude(obj[i]->rigidBody.angluarVel)*deltaTime*100, obj[i]->rigidBody.angluarVel);
 		
 		Vector3 normal = collide(i, obj, count);
 		
-		Vector3 force = { 0,-3.8, 0 };
+		Vector3 force = { 0,-4.8, 0 };
 		force = sub(force, vmul(obj[i]->rigidBody.lineralVel,0.6));
 		obj[i]->rigidBody.lineralVel = add(obj[i]->rigidBody.lineralVel, vmul(force, deltaTime/3/ obj[i]->rigidBody.mass));
 		gizmosDrawLineV3(vecToVector(obj[i]->position), add(vecToVector(obj[i]->position), obj[i]->rigidBody.lineralVel));
@@ -173,12 +172,12 @@ Object* castRay(Vector3 start, Vector3 dir, RigidBodyWorld* rw)
 	for(int i=0; i < rw->size;i++)
 	{
 		float dst = distanceToRay(start, dir, vecToVector(rw->items[i]->position));
-		if(dst< minDst && dst<0.5 && dot(dir, sub(vecToVector(rw->items[i]->position), start))>0)
+		if(dst< minDst && dst<0.8 && dot(dir, sub(vecToVector(rw->items[i]->position), start))>0)
 		{
 			minId = i;
 			minDst = dst;
 		}
-		printf("%f\n", dst);
+		//printf("%f\n", dst);
 	}
 	return minId==-1? NULL : rw->items[minId];
 }

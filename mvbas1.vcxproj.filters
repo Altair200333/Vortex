@@ -34,6 +34,12 @@
     <Filter Include="Файлы ресурсов\Shaders\shadows\pointShadows">
       <UniqueIdentifier>{98fccd4b-9877-482d-ba44-4c0f69fd46c9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\levels">
+      <UniqueIdentifier>{8fc34a2f-95ee-4eda-964a-47e9e59ba80d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\levels">
+      <UniqueIdentifier>{cf211965-7f63-44af-b6ee-2a815d28a958}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="start1.c">
@@ -68,6 +74,9 @@
     </ClCompile>
     <ClCompile Include="vector3.c">
       <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="level0.c">
+      <Filter>Файлы ресурсов\levels</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +120,9 @@
     </ClInclude>
     <ClInclude Include="vector3.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="level0.h">
+      <Filter>Файлы заголовков\levels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

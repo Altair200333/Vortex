@@ -124,6 +124,7 @@
   <ItemGroup>
     <ClCompile Include="baseShader.c" />
     <ClCompile Include="gizmos.c" />
+    <ClCompile Include="level0.c" />
     <ClCompile Include="lightSource.c" />
     <ClCompile Include="physics.c" />
     <ClCompile Include="Player.c" />
@@ -142,6 +143,7 @@
   <ItemGroup>
     <ClInclude Include="baseShader.h" />
     <ClInclude Include="gizmos.h" />
+    <ClInclude Include="level0.h" />
     <ClInclude Include="lightSource.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="Player.h" />
