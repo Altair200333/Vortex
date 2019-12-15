@@ -96,35 +96,46 @@ void renderDirectionalLight(Shader* sh, LightSource* ls)
 	setFloat(sh, "dirLight.strength", dr->strength);
 }
 
+#define concat(x, y) do{char a[12]; sprintf(a, "%d", y);\
+						printf("%s%s\n", "position", a);\
+						}while(0);
+#define set2(x) do{\
+					printf("%s\n", #x);\
+					p##x("%s\n", "set"###x);\
+					}while(0);
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#define postToShader(base, id, target, type, param)\
+do {\
+char str[40];\
+snprintf(str, 40, base##"[%d]."##target, id);	\
+set##type(standartShader, str, param);\
+} while (0);
 
 //Set this light data to shader, recalculate light affect
 void renderPointLight(Shader* sh, LightSource* ls) 
 {
+	
+	//concat(sda, sda2);
+	//set2(rintf);
+	
+	
 	PointLight* pl = (PointLight*)(ls->lightSrc);
 	char base[20];
 	snprintf(base, 20, "pointLights[%d].", currentPointLightId); // puts string into buffer
-	char data[40];
-	strcpy(data, base);
-	strcat(data, "position");
-	setVec3(standartShader, data, (pl->position)[0], pl->position[1], pl->position[2]);
-	strcpy(data, base);
-	strcat(data, "ambient");
-	setVec3(standartShader, data, pl->ambient[0], pl->ambient[1], pl->ambient[2]);
-	strcpy(data, base);
-	strcat(data, "diffuse");
-	setVec3(standartShader, data, pl->diffuse[0], pl->diffuse[1], pl->diffuse[2]);
-	strcpy(data, base);
-	strcat(data, "specular");
-	setVec3(standartShader, data, pl->specular[0], pl->specular[1], pl->specular[2]);
-	strcpy(data, base);
-	strcat(data, "constant");
-	setFloat(standartShader, data, pl->constant);
-	strcpy(data, base);
-	strcat(data, "linear");
-	setFloat(standartShader, data, pl->linear);
-	strcpy(data, base);
-	strcat(data, "quadratic");
-	setFloat(standartShader, data, pl->quadratic);
+
+	
+	postToShader("pointLights", currentPointLightId, "position", Vec3V, (pl->position));
+	postToShader("pointLights", currentPointLightId, "ambient", Vec3V, pl->ambient);
+	postToShader("pointLights", currentPointLightId, "diffuse", Vec3V, pl->diffuse);
+	postToShader("pointLights", currentPointLightId, "specular", Vec3V, pl->specular);
+	
+	postToShader("pointLights", currentPointLightId, "constant", Float, pl->constant);
+	postToShader("pointLights", currentPointLightId, "linear", Float, pl->linear);
+	postToShader("pointLights", currentPointLightId, "quadratic", Float, pl->quadratic);
+	
 	currentPointLightId++;
 }
 void renderSpotLight(Shader* sh, LightSource* ls)

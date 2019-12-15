@@ -183,4 +183,9 @@
       <Filter>Файлы ресурсов</Filter>
     </Font>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\..\Download\cat.jpg">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

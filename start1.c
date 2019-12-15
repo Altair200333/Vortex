@@ -32,7 +32,7 @@ float Fspeed = 5;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-float timeScale = 1.0f;
+float timeScale = 0.0f;
 
 // уда продавать душу за перегрузки и наследование?
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -67,51 +67,44 @@ RigidBodyWorld rw;
 //move player every frame(calback sucks)
 bool down = false, Rdown = false;
 
-void addObject(Vector3 pos)
+void addSphereObject(Vector3 pos)
 {
-	appendObject(&list, fromStlFile("ico1.stl"));
+	appendObject(&list, generateSphere());
 	translateGlobalV3(&list.objects[list.count - 1], pos);
 	addObjectToWorld(&rw, &(list.objects[list.count - 1]));
 }
-void addObjectVel(Vector3 pos, Vector3 initVel)
-{
-	appendObject(&list, fromStlFile("ico1.stl"));
-	translateGlobalV3(&list.objects[list.count - 1], pos);
-	addObjectToWorld(&rw, &(list.objects[list.count - 1]));
-	for (int i = 0; i < 3; i++)
-		list.objects[list.count - 1].rigidBody.lineralVel.axis[i] = initVel.axis[i];
-}
+
 void movePlayer(GLFWwindow* window)
 {
 	float speed = Fspeed * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		translateM(&pl, pl.dir, speed);
+		translateMagnitude(&pl, pl.dir, speed);
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		translateM(&pl, pl.dir, -speed);
+		translateMagnitude(&pl, pl.dir, -speed);
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
 		vec3 tr;
 		glm_vec3_cross(pl.dir, pl.up, tr);
-		translateM(&pl, tr, speed);
+		translateMagnitude(&pl, tr, speed);
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
 		vec3 tr;
 		glm_vec3_cross(pl.dir, pl.up, tr);
-		translateM(&pl, tr, -speed);
+		translateMagnitude(&pl, tr, -speed);
 
 	}
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
-		translateM(&pl, pl.up, speed);
+		translateMagnitude(&pl, pl.up, speed);
 	}
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
-		translateM(&pl, pl.up, -speed);
+		translateMagnitude(&pl, pl.up, -speed);
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !down)
 	{
@@ -157,7 +150,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	posX1 = xpos;
 	posY1 = ypos;
-
 }
 
 
@@ -234,7 +226,7 @@ void initLights(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, Lig
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	
+	Object a;
 }
 
 int main()
@@ -244,7 +236,6 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	unsigned long counter = 1;
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_BLEND);
@@ -256,11 +247,10 @@ int main()
 	initScene(&scene, onUpdate, onStart);
 	
 	standartShader = makeShader("vertexSh1.vs", "fragmentSh.fs");
-	Shader* lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
+	lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
 
 	simpleDepthShader = makeShaderGeometry("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
 
-	//fromStlFile("dev.stl");
 	vec3 lightPos = { -6.0f, 4.0f, -3.2f };
 
 	vec3 cubePositions[] = {
@@ -302,6 +292,8 @@ int main()
 		setShader(&(lightModels[i]), lightShader);
 	}
 	RigidBodyWorldInit(&rw);
+
+	
 	
 	appendObject(&list,  generatePlane(1));
 	glm_translate(list.objects[list.count-1].model, (vec3) { 2, -4.0f, -2 });
@@ -309,28 +301,28 @@ int main()
 	rotateAxis(&list.objects[list.count - 1], 90, (vec3) { 1.0f, 0.0f, 0.0f });
 	
 	appendObject(&list, fromStlFile("dev.stl"));
-	appendObject(&list, fromStlFile("ico.stl"));
+	appendObject(&list, generateSphere());
 	glm_translate(list.objects[list.count - 1].model, (vec3) { -10, -2.9, -10.5 });
 
 	appendObject(&list, fromStlFile("cage.stl"));
 	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
 	
 	appendObject(&list, fromStlFile("cage.stl"));
-	appendObject(&list, fromStlFile("ico1.stl"));
+	appendObject(&list, generateSphere());
 	translateGlobal(&list.objects[list.count - 1], (vec3) { -2.5, 3, -1.2 });
 	//list.objects[list.count - 1].rigidBody.lineralVel[1] = -0.01;
-	appendObject(&list, fromStlFile("ico1.stl"));
+	appendObject(&list, generateSphere());
 	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, 0, -1 });
 
-	appendObject(&list, fromStlFile("ico1.stl"));
+	appendObject(&list, generateSphere());
 	translateGlobal(&list.objects[list.count - 1], (vec3) { -3.5, 5, -1 });
 
-	appendObject(&list, fromStlFile("ico1.stl"));
+	appendObject(&list, generateSphere());
 	translateGlobal(&list.objects[list.count - 1], (vec3) { -4.4, 6, -1 });
 	
-	addObject((Vector3) { -4, 7, -1 });
-	addObjectVel((Vector3) { -4, 9, -1.1 }, (Vector3){0,0,1});
-	addObjectVel((Vector3) { -3, 9, -1.1 }, (Vector3){1,0,-1});
+	addSphereObject((Vector3) { -4, 7, -1 });
+	addObjectVel((Vector3) { -4, 9, -1.1 }, (Vector3){0,0,1}, &list, &rw);
+	addObjectVel((Vector3) { -3, 9, -1.1 }, (Vector3){1,0,-1}, &list, &rw);
 	
 	LightSource* ls;
 	LightSource* ps;
@@ -391,22 +383,20 @@ int main()
 		float currentFrame = glfwGetTime();
 		deltaTime = (currentFrame - lastFrame)*timeScale;
 		lastFrame = currentFrame;
-		
-		//printf("%f\n", deltaTime);
-		
+
+		//clear the screen
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearStencil(0); // this is the default value
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		
 		//--DRAW
 		movePlayer(window);
-		recalculate(&pl);
+		recalculateLookDirection(&pl);
 		
 		//----------------
 		//================= Calc shadows
 		scene.onUpdate(scene);
-		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 1*deltaTime,
+		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 0.2*deltaTime,
 			(vec3) { 0, 1, 0 });
 		setPos(&(lightList.objects[0]), ((PointLight*)(ps->lightSrc))->position);
 
@@ -426,7 +416,7 @@ int main()
 		renderListLights(standartShader, &ll);
 		
 		rotateAxis(&(list.objects[3]), 20*deltaTime, (vec3) { 0, 1, 0 });
-		translateGlobal(&(list.objects[3]), (vec3) { 0, 0.005, 0 });
+		translateGlobal(&(list.objects[3]), (vec3) { 0, 0.002, 0 });
 
 
 		computeCubeFall((Object*[]){  &(list.objects[4])}, 1, deltaTime);
@@ -439,7 +429,12 @@ int main()
 		renderListObjects(&lightList);
 
 		glBindVertexArray(0);
-
+		vec3 pos2;
+		vec3 dd;
+		glm_mat4_mulv3(list.objects[3].model, (vec3) { -0.5, 0, 0 },0, pos2);
+		glm_vec3_add(list.objects[3].position, pos2, dd);
+		gizmosDrawLine(list.objects[3].position, dd);
+		
 		if(pl.selection!=NULL)
 		{
 			//gizmosDrawLineV3(vecToVector(pl.selection->position), add(vecToVector(pl.selection->position), (Vector3) { 0, 1, 0 }));

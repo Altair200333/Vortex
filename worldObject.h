@@ -9,7 +9,6 @@
 #include <cglm/types.h>
 #include "vector3.h"
 
-//assume thats cube for now
 typedef struct _RigidBody
 {
 	Vector3 angluarVel;
@@ -47,6 +46,7 @@ void initRigidBody(Object* obj);
 void appendObject(ListObjects* o, Object obj);
 void setShader(Object* obj, Shader* shader);
 Object generateCube(float scale);
+Object generateSphere();
 Object generatePlane(float scale);
 Object fromStlFile(char* name);
 void rotateAxis(Object* obj, float angle, vec3 axis);

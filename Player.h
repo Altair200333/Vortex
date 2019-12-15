@@ -20,9 +20,9 @@ typedef struct {
 }Player;
 
 Player initPlayer(float fov, int w, int h);
-void recalculate(Player* pl);
-void translate(Player* pl, vec3 dir);
-void translateM(Player* pl, vec3 dir, float m);
+void recalculateLookDirection(Player* pl);
+void translatePlayer(Player* pl, vec3 dir);
+void translateMagnitude(Player* pl, vec3 dir, float m);
 void setProjectionView(Player* pl, Shader* s);
 
 #endif

@@ -3,7 +3,7 @@
 #include <math.h>
 #include "gizmos.h"
 #include "vector3.h"
-#include "../deps/linmath.h"
+
 //Every collision creates counteracting impulse applying to body
 void computeCubeFall(Object* obj[], size_t count, float deltaTime)
 {
@@ -180,4 +180,12 @@ Object* castRay(Vector3 start, Vector3 dir, RigidBodyWorld* rw)
 		//printf("%f\n", dst);
 	}
 	return minId==-1? NULL : rw->items[minId];
+}
+void addObjectVel(Vector3 pos, Vector3 initVel, ListObjects* list, RigidBodyWorld* rw)
+{
+	appendObject(list, fromStlFile("ico1.stl"));
+	translateGlobalV3(&list->objects[list->count - 1], pos);
+	addObjectToWorld(rw, &(list->objects[list->count - 1]));
+	for (int i = 0; i < 3; i++)
+		list->objects[list->count - 1].rigidBody.lineralVel.axis[i] = initVel.axis[i];
 }

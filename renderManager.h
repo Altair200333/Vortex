@@ -14,6 +14,7 @@ static unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
 Shader* standartShader;
 Shader* simpleDepthShader;
+Shader* lightShader;
 
 
 GLFWwindow* initWindow(int w, int h);

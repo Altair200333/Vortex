@@ -157,6 +157,11 @@ void setVec3(Shader* sh, char* name, float x, float y, float z)
 	GLint Location = glGetUniformLocation(sh->Program, name);
 	glUniform3f(Location, x, y, z);
 }
+void setVec3V(Shader* sh, char* name, vec3 param)
+{
+	GLint Location = glGetUniformLocation(sh->Program, name);
+	glUniform3f(Location, param[0], param[1], param[2]);
+}
 void setFloat(Shader* sh, char* name, float x)
 {
 	GLint Location = glGetUniformLocation(sh->Program, name);

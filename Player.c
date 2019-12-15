@@ -22,18 +22,18 @@ Player initPlayer(float fov, int w, int h)
 
 	return pl;
 }
-void recalculate(Player* pl)
+void recalculateLookDirection(Player* pl)
 {
 	glm_look(pl->eye, pl->dir, pl->up, pl->view);
 
 }
-void translate(Player* pl, vec3 dir)
+void translatePlayer(Player* pl, vec3 dir)
 {
 	pl->eye[0] += dir[0];
 	pl->eye[1] += dir[1];
 	pl->eye[2] += dir[2];
 }
-void translateM(Player* pl, vec3 dir, float m)
+void translateMagnitude(Player* pl, vec3 dir, float m)
 {
 	pl->eye[0] += dir[0]*m;
 	pl->eye[1] += dir[1]*m;

@@ -175,6 +175,9 @@
   <ItemGroup>
     <Font Include="ARIAL.TTF" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\..\Download\cat.jpg" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
