@@ -24,6 +24,7 @@
 #include "physics.h"
 #include "gizmos.h"
 #include "level0.h"
+#include <assert.h>
 
 bool EdgeViewMode = false;
 Player pl;
@@ -66,12 +67,13 @@ ListObjects list = { NULL, 0 };
 RigidBodyWorld rw;
 //move player every frame(calback sucks)
 bool down = false, Rdown = false;
-
-void addSphereObject(Vector3 pos)
+int initialized = 0;
+void addSphereObject(vec3 pos)
 {
-	appendObject(&list, generateSphere());
-	translateGlobalV3(&list.objects[list.count - 1], pos);
-	addObjectToWorld(&rw, &(list.objects[list.count - 1]));
+	Object* obj = appendObject(&list, generateSphere());
+	translateGlobal(obj, pos);
+	addObjectToWorld(&rw, obj);
+	initialized++;
 }
 
 void movePlayer(GLFWwindow* window)
@@ -111,7 +113,7 @@ void movePlayer(GLFWwindow* window)
 		down = true;
 		printf("Down\n");
 
-		pl.selection = castRay(vecToVector(pl.eye), vecToVector(pl.dir), &rw);
+		pl.selection = castRayToRigidBodies(vecToVector(pl.eye), vecToVector(pl.dir), &rw);
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && down)
 	{
@@ -228,7 +230,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	Object a;
 }
-
+bool loaded = false;
 int main()
 {
 	GLFWwindow* window = initWindow(windowWidth, windowHeight);
@@ -246,11 +248,11 @@ int main()
 	Scene scene;
 	initScene(&scene, onUpdate, onStart);
 	
-	standartShader = makeShader("vertexSh1.vs", "fragmentSh.fs");
-	lightShader = makeShader("lightVertexShader.vs", "lightFragmentShader.fs");
+	standartShader = generateShaderVertFrag("vertexSh1.vs", "fragmentSh.fs");
+	lightShader = generateShaderVertFrag("lightVertexShader.vs", "lightFragmentShader.fs");
 
-	simpleDepthShader = makeShaderGeometry("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
-
+	simpleDepthShader = generateShaderVertFragGeom("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
+	
 	vec3 lightPos = { -6.0f, 4.0f, -3.2f };
 
 	vec3 cubePositions[] = {
@@ -320,9 +322,6 @@ int main()
 	appendObject(&list, generateSphere());
 	translateGlobal(&list.objects[list.count - 1], (vec3) { -4.4, 6, -1 });
 	
-	addSphereObject((Vector3) { -4, 7, -1 });
-	addObjectVel((Vector3) { -4, 9, -1.1 }, (Vector3){0,0,1}, &list, &rw);
-	addObjectVel((Vector3) { -3, 9, -1.1 }, (Vector3){1,0,-1}, &list, &rw);
 	
 	LightSource* ls;
 	LightSource* ps;
@@ -376,10 +375,31 @@ int main()
 	addObjectToWorld(&rw, &(list.objects[15]));
 	addObjectToWorld(&rw, &(list.objects[16]));
 	addObjectToWorld(&rw, &(list.objects[17]));
+	
+	addSphereObject((vec3) { -4, 9, -1 });
+	addSphereObject((vec3) { -4, 11, -1.1 });
+	
 
-	scene.onStart(scene);
+	for(int i=0;i<50;i++)
+	{
+		addSphereObject((vec3) { -4+cos(i), 12+1.1*i, -1.1 +sin(i)});
+	}
+	
+	printf("finished %g\n", glfwGetTime);
+
+	//scene.onStart(scene);
+	lastFrame = glfwGetTime();
+
+	
+	//addObjectToWorld(&rw, &(list.objects[3]));
+	err = fopen("logfile.txt", "w");
+
+	list.objects[3].rigidBody.lineralVel.axis[1] = -0.2;
+	loaded = true;
+	printf("%d\n", initialized);
 	while (!glfwWindowShouldClose(window))
 	{
+		
 		float currentFrame = glfwGetTime();
 		deltaTime = (currentFrame - lastFrame)*timeScale;
 		lastFrame = currentFrame;
@@ -415,25 +435,21 @@ int main()
 		
 		renderListLights(standartShader, &ll);
 		
-		rotateAxis(&(list.objects[3]), 20*deltaTime, (vec3) { 0, 1, 0 });
-		translateGlobal(&(list.objects[3]), (vec3) { 0, 0.002, 0 });
+		//rotateAxis(&(list.objects[3]), 20*deltaTime, (vec3) { 0, 1, 0 });
+		//translateGlobal(&(list.objects[3]), (vec3) { 0, -0.2*deltaTime, 0 });
 
-
-		computeCubeFall((Object*[]){  &(list.objects[4])}, 1, deltaTime);
-		//computeSomething((Object*[]){  &(list.objects[15]), &(list.objects[14]), &(list.objects[16]), &(list.objects[17])}, 4, deltaTime);
-		updatePhysicsWorld(&rw, deltaTime);
-		//rotateAxis(&(objects[4]), 0.6f, (vec3) { 0.1, 0.2, -0.3 });
+		if (deltaTime > 0 && loaded)
+		{
+			computeCubeFall((Object*[]) { &(list.objects[4]) }, 1, deltaTime);
+			//Call update physics every frame
+			updatePhysicsWorld(&rw, deltaTime);
+		}
 		renderListObjects(&list);
-		
-		
+		updateCube(&(list.objects[3]), deltaTime);
+
 		renderListObjects(&lightList);
 
 		glBindVertexArray(0);
-		vec3 pos2;
-		vec3 dd;
-		glm_mat4_mulv3(list.objects[3].model, (vec3) { -0.5, 0, 0 },0, pos2);
-		glm_vec3_add(list.objects[3].position, pos2, dd);
-		gizmosDrawLine(list.objects[3].position, dd);
 		
 		if(pl.selection!=NULL)
 		{

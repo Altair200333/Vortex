@@ -1,8 +1,10 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "physics.h"
 #include "worldObject.h"
 #include <math.h>
 #include "gizmos.h"
 #include "vector3.h"
+#include <assert.h>
 
 //Every collision creates counteracting impulse applying to body
 void computeCubeFall(Object* obj[], size_t count, float deltaTime)
@@ -50,19 +52,21 @@ void collideObj(Object* obj, Vector3 normal)
 	//1.8 is bounciness - it should be set in rigid body properties
 	obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel,
 		vmul(normal,
-			fabs(1.8*dot(normal, obj->rigidBody.lineralVel) / sqMagnitude(normal))));
+			fabs(1.4*dot(normal, obj->rigidBody.lineralVel) / sqMagnitude(normal))));
 	
 	float dotp = dot(obj->rigidBody.lineralVel, normal);
 	float frC = dotp * dotp / sqMagnitude(obj->rigidBody.lineralVel) / sqMagnitude(normal);
+	if (isnan(frC))
+		return;
 	float sina;
 	frC >= 1 ? (sina = 0) : (sina = sqrt(1 - frC));
 
 	//that's the angular speed - cross product of speed and normalized offset direction
 	//means the component of speed that's perpendicular to normal
 	Vector3 cr = cross(obj->rigidBody.lineralVel, normalized(normal));
-
-	//kind'a the same stuff is friction, actually it's wrong approach for friction setup, i should rely on delta time, not only speed and angles
+		
 	obj->rigidBody.lineralVel = vmul(obj->rigidBody.lineralVel, 1 - frC/10);
+	printf("%g \n", frC);
 	
 	obj->rigidBody.angluarVel = vmul(cr,-1);
 
@@ -115,9 +119,25 @@ void computeSomething(Object* obj[], size_t count, float deltaTime)
 		Vector3 normal = collide(i, obj, count);
 		
 		Vector3 force = { 0,-4.8, 0 };
-		force = sub(force, vmul(obj[i]->rigidBody.lineralVel,0.6));
-		obj[i]->rigidBody.lineralVel = add(obj[i]->rigidBody.lineralVel, vmul(force, deltaTime/3/ obj[i]->rigidBody.mass));
-		gizmosDrawLineV3(vecToVector(obj[i]->position), add(vecToVector(obj[i]->position), obj[i]->rigidBody.lineralVel));
+		printf("%d %g %g\n", count, obj[i]->rigidBody.lineralVel.axis[0], deltaTime);
+		if (isnan(obj[i]->rigidBody.lineralVel.axis[0]))
+		{
+			printf("sdad");
+		}
+		
+		Vector3 vv = vmul(obj[i]->rigidBody.lineralVel, 0.6);
+		force = sub(force, vv);
+		
+		
+		obj[i]->rigidBody.lineralVel = add(obj[i]->rigidBody.lineralVel, vmul(force, deltaTime*0.3f/ obj[i]->rigidBody.mass));
+		
+		
+		//assert(!isnan(obj[i]->rigidBody.lineralVel.axis[0]));
+		//gizmosDrawLineV3(vecToVector(obj[i]->position), add(vecToVector(obj[i]->position), obj[i]->rigidBody.lineralVel));
+		
+		fprintf(err, "%d - %g %g %g ;; %g %g %g\n", i, obj[i]->position[0], obj[i]->position[1], obj[i]->position[2], 
+			obj[i]->rigidBody.lineralVel.axis[0], obj[i]->rigidBody.lineralVel.axis[1], obj[i]->rigidBody.lineralVel.axis[2]);
+		
 		translateGlobalV3(obj[i], vmul(obj[i]->rigidBody.lineralVel, deltaTime));
 	}
 
@@ -127,25 +147,24 @@ void addObjectToWorld(RigidBodyWorld* rw, Object* obj)
 {
 	if(rw->items == NULL)
 	{
-		rw->items = malloc(sizeof(Object*) * 100);
+		rw->items = malloc(sizeof(Object*) * 20);
 		if (rw->items == NULL)
 		{
 			printf("failed to allocate memory");
 			return;
 		}
-		rw->capacity = 100;
+		rw->capacity = 20;
 		rw->size = 0;
 	}
 	if(rw->size == rw->capacity)
 	{
-		Object** newO = realloc(rw->items, sizeof(Object*) * (rw->capacity*2));
-		if (newO == NULL)
+		rw->items = (Object**)realloc(rw->items, sizeof(Object*) * (rw->capacity*2));
+		if (rw->items == NULL)
 		{
 			printf("failed to allocate memory");
 			return;
 		}
-		free(rw->items);
-		rw->items = newO;
+		
 		rw->capacity *= 2;
 	}
 	rw->items[rw->size] = obj;
@@ -165,7 +184,7 @@ float distanceToRay(Vector3 start, Vector3 dir, Vector3 pos)
 {
 	return magnitude(cross(dir, sub(pos,  start)));
 }
-Object* castRay(Vector3 start, Vector3 dir, RigidBodyWorld* rw)
+Object* castRayToRigidBodies(Vector3 start, Vector3 dir, RigidBodyWorld* rw)
 {
 	float minDst = INT_MAX;
 	int minId = -1;
@@ -183,9 +202,36 @@ Object* castRay(Vector3 start, Vector3 dir, RigidBodyWorld* rw)
 }
 void addObjectVel(Vector3 pos, Vector3 initVel, ListObjects* list, RigidBodyWorld* rw)
 {
-	appendObject(list, fromStlFile("ico1.stl"));
+	appendObject(list, generateSphere());
 	translateGlobalV3(&list->objects[list->count - 1], pos);
 	addObjectToWorld(rw, &(list->objects[list->count - 1]));
 	for (int i = 0; i < 3; i++)
 		list->objects[list->count - 1].rigidBody.lineralVel.axis[i] = initVel.axis[i];
+}
+
+vec3 ver[] = { {-0.5, -0.5, -0.5}, {0.5, -0.5, -0.5}, {0.5, 0.5, -0.5}, {0.5, 0.5, 0.5}, {-0.5, 0.5, 0.5}, {-0.5, -0.5, 0.5},{0.5, -0.5, 0.5}, {-0.5, 0.5, -0.5} };
+void updateCube(Object* obj, float dt)
+{
+	vec3 collisions[4];
+	int collisionCount=0;
+	
+	translateGlobalV3(obj, vmul(obj->rigidBody.lineralVel, dt));
+	vec3 localVertexPos;
+	vec3 vertexPos;
+	for (int i = 0; i < 8; i++)
+	{
+		glm_mat4_mulv3(obj->model, ver[i], 0, localVertexPos);
+		glm_vec3_add(obj->position, localVertexPos, vertexPos);
+		
+		if(vertexPos[1]<-3.5f)
+		{
+			gizmosDrawLine(obj->position, vertexPos);
+			obj->rigidBody.lineralVel.axis[1] = 0;
+			//printf("Inside %d\n", obj->rigidBody.lineralVel.axis[1]);
+			
+			glm_vec3_copy(vertexPos, collisions[collisionCount]);
+			collisionCount++;
+
+		}
+	}
 }

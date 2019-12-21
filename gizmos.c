@@ -32,7 +32,7 @@ void gizmosDrawLine(vec3 start, vec3 end)
 	// Normal attribute
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
 
 	//use standart shader to draw green line
 	useShader(standartShader);

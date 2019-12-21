@@ -43,7 +43,7 @@ typedef struct
 
 
 void initRigidBody(Object* obj);
-void appendObject(ListObjects* o, Object obj);
+Object* appendObject(ListObjects* o, Object obj);
 void setShader(Object* obj, Shader* shader);
 Object generateCube(float scale);
 Object generateSphere();

@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 
-char* getShader(const char* shaderPath)
+char* getShaderFromFile(const char* shaderPath)
 {
 	char * buffer = NULL;
 	long length=0;
@@ -39,7 +39,7 @@ void useShader(Shader* shader)
 {
 	glUseProgram(shader->Program);
 }
-void checkCompileErrors(GLuint shader, char* type)
+void checkForShaderCompileErrors(GLuint shader, char* type)
 {
 	GLint success;
 	GLchar infoLog[1024];
@@ -64,10 +64,10 @@ void checkProgrammCompileErrors(GLuint shader, char* type)
 		printf("ERROR::PROGRAM_LINKING_ERROR of type: %s\n", infoLog);
 	}
 }
-Shader* makeShader(const GLchar* vertexPath, const GLchar* fragmentPath)
+Shader* generateShaderVertFrag(const GLchar* vertexPath, const GLchar* fragmentPath)
 {
-	GLchar* vShaderCode = getShader(vertexPath);
-	GLchar* fShaderCode = getShader(fragmentPath);
+	GLchar* vShaderCode = getShaderFromFile(vertexPath);
+	GLchar* fShaderCode = getShaderFromFile(fragmentPath);
 	//printf("%s \n", vShaderCode);
 	//printf("%s \n", fShaderCode);
 
@@ -111,29 +111,29 @@ Shader* makeShader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	
 	return shader;
 }
-Shader* makeShaderGeometry(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath)
+Shader* generateShaderVertFragGeom(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath)
 {
-	GLchar* vShaderCode = getShader(vertexPath);
-	GLchar* fShaderCode = getShader(fragmentPath);
-	GLchar* gShaderCode = getShader(geometryPath);
+	GLchar* vShaderCode = getShaderFromFile(vertexPath);
+	GLchar* fShaderCode = getShaderFromFile(fragmentPath);
+	GLchar* gShaderCode = getShaderFromFile(geometryPath);
 									
 	unsigned int vertex, fragment;
 	// vertex shader
 	vertex = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex, 1, &vShaderCode, NULL);
 	glCompileShader(vertex);
-	checkCompileErrors(vertex, "VERTEX");
+	checkForShaderCompileErrors(vertex, "VERTEX");
 	// fragment Shader
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment, 1, &fShaderCode, NULL);
 	glCompileShader(fragment);
-	checkCompileErrors(fragment, "FRAGMENT");
+	checkForShaderCompileErrors(fragment, "FRAGMENT");
 	// if geometry shader is given, compile geometry shader
 	unsigned int geometry;
 	geometry = glCreateShader(GL_GEOMETRY_SHADER);
 	glShaderSource(geometry, 1, &gShaderCode, NULL);
 	glCompileShader(geometry);
-	checkCompileErrors(geometry, "GEOMETRY");
+	checkForShaderCompileErrors(geometry, "GEOMETRY");
 	
 	// shader Program
 	Shader* shader;
@@ -151,10 +151,13 @@ Shader* makeShaderGeometry(const GLchar* vertexPath, const GLchar* fragmentPath,
 
 	return shader;
 }
+//Bunch of methods for posting data to shader
+
 
 void setVec3(Shader* sh, char* name, float x, float y, float z)
 {
 	GLint Location = glGetUniformLocation(sh->Program, name);
+	
 	glUniform3f(Location, x, y, z);
 }
 void setVec3V(Shader* sh, char* name, vec3 param)

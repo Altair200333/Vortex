@@ -4,6 +4,7 @@
 #include <cglm/cglm.h>
 #include <cglm/mat4.h>
 #include <cglm/types.h>
+#include "gizmos.h"
 
 GLFWwindow* initWindow(int width, int height)
 {
@@ -96,17 +97,7 @@ void renderDirectionalLight(Shader* sh, LightSource* ls)
 	setFloat(sh, "dirLight.strength", dr->strength);
 }
 
-#define concat(x, y) do{char a[12]; sprintf(a, "%d", y);\
-						printf("%s%s\n", "position", a);\
-						}while(0);
-#define set2(x) do{\
-					printf("%s\n", #x);\
-					p##x("%s\n", "set"###x);\
-					}while(0);
-
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
+//
 #define postToShader(base, id, target, type, param)\
 do {\
 char str[40];\
@@ -261,5 +252,6 @@ void renderListObjects(ListObjects* li)
 	for(int i=0;i<li->count;i++)
 	{
 		li->objects[i].render(&(li->objects[i]));
+		gizmosDrawLineV3(vecToVector(li->objects[i].position), add(vecToVector(li->objects[i].position), li->objects[i].rigidBody.lineralVel));
 	}
 }
