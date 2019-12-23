@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{80494BF8-838E-4694-ADBA-AE8D7018EF1A}</ProjectGuid>
+    <RootNamespace>mvbas1</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseReleaseLibraries>true</UseReleaseLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseReleaseLibraries>false</UseReleaseLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseReleaseLibraries>true</UseReleaseLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseReleaseLibraries>false</UseReleaseLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>E:\WORK\C\gpcop\SDL2-2.0.10\include;E:\WORK\C\gpcop\freetype-2.10.0\include;E:\WORK\C\gpcop\cglm-master\include;E:\WORK\C\gpcop\glew-2.1.0\include;E:\WORK\C\gpcop\glfw-3.3\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\WORK\C\gpcop\freetype-2.10.0\objs\Win32\Release;E:\WORK\C\gpcop\glfw-3.3\build\src\Release;E:\WORK\C\gpcop\glfw-3.3\build\CMakeFiles\Export\lib;E:\WORK\C\gpcop\glew-2.1.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>E:\WORK\C\gpcop\glfw-3.3\include;E:\WORK\C\gpcop\glew-2.1.0\include;E:\WORK\C\gpcop\cglm-master\include;E:\WORK\C\gpcop\freetype-2.10.0\include;E:\WORK\C\gpcop\SDL2-2.0.10\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\WORK\C\gpcop\freetype-2.10.0\objs\Win32\Release;E:\WORK\C\gpcop\glew-2.1.0\lib\Release\Win32;E:\WORK\C\gpcop\glfw-3.3\build\CMakeFiles\Export\lib;E:\WORK\C\gpcop\glfw-3.3\build\src\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>freetype.lib;opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>NotSet</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>freetype.lib;opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="baseShader.c" />
+    <ClCompile Include="gizmos.c" />
+    <ClCompile Include="level0.c" />
+    <ClCompile Include="lightSource.c" />
+    <ClCompile Include="physics.c" />
+    <ClCompile Include="Player.c" />
+    <ClCompile Include="renderManager.c" />
+    <ClCompile Include="Scene.c" />
+    <ClCompile Include="start1.c" />
+    <ClCompile Include="textType.c" />
+    <ClCompile Include="vector3.c" />
+    <ClCompile Include="worldObject.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="fragmentSh.fs" />
+    <Text Include="lightFragmentShader.fs" />
+    <Text Include="lightVertexShader.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="baseShader.h" />
+    <ClInclude Include="gizmos.h" />
+    <ClInclude Include="level0.h" />
+    <ClInclude Include="lightSource.h" />
+    <ClInclude Include="physics.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="renderManager.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="textType.h" />
+    <ClInclude Include="vector3.h" />
+    <ClInclude Include="worldObject.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="build.stl" />
+    <None Include="cage.stl" />
+    <None Include="car.stl" />
+    <None Include="Release_quad.vs" />
+    <None Include="Release_quad_depth.fs" />
+    <None Include="dev.stl" />
+    <None Include="ico1.stl" />
+    <None Include="Katie.stl" />
+    <None Include="point_shadows_depth.fs" />
+    <None Include="point_shadows_depth.gs" />
+    <None Include="point_shadows_depth.vs" />
+    <None Include="shadowMappingDepth.fs" />
+    <None Include="shadowMappingDepth.vs" />
+    <None Include="sps.stl" />
+    <None Include="textFragmentSh.fs" />
+    <None Include="textVertexSh.vs" />
+    <None Include="vertexSh1.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="ARIAL.TTF" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\..\Download\cat.jpg" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -252,12 +252,12 @@ int main()
 	lightShader = generateShaderVertFrag("lightVertexShader.vs", "lightFragmentShader.fs");
 
 	simpleDepthShader = generateShaderVertFragGeom("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
-	
+
 	vec3 lightPos = { -6.0f, 4.0f, -3.2f };
 
 	vec3 cubePositions[] = {
 		{0.0f,  0.0f,  0.0f}, 
-		{2.0f,  5.0f, -15.0f},
+		{-5.0f,  -2.0f, -7.0f},
 		{-1.5f, -2.2f, -2.5f},
 		{-3.8f, -2.0f, -12.3f},
 		{2.4f, 5.0f, -3.5f},
@@ -273,6 +273,7 @@ int main()
 		{2.3f, -3.3f, -4.0f},
 		{-4.0f,  6.0f, -12.0f},
 	};
+
 	pl = initPlayer(45, windowWidth, windowHeight);
 
 	//glEnable(GL_CULL_FACE);
@@ -280,47 +281,38 @@ int main()
 	for (unsigned int i = 0; i < 9; i++)
 	{
 		appendObject(&list, generateCube(1));
-		translateGlobal(&(list.objects[i]), cubePositions[i]);
-		//glm_translate(list.objects[i].model, cubePositions[i]);
+		translateGlobal((list.objects[i]), (float*)cubePositions[i]);
+		//glm_translate(list.objects[i]->model, cubePositions[i]);
 	}
-
-	Object lightModels[3];
+	appendObject(&list, fromStlFile("engDemo.stl"));
+	translateGlobalV3(list.objects[list.count - 1], (Vector3) { 1, 0, -11 });
+	Object* lightModels[3];
 	for (int i = 0; i < 3; i++)
 	{
 		lightModels[i] = generateCube(0.3f);
 		//appendObject(&list, lightModels[i]);
-		setPos(&(lightModels[i]), pointLightPositions[i]);
+		setPos((lightModels[i]), pointLightPositions[i]);
 		//glm_scale(lightModels[i].model, (vec3) { 0.3, 0.3, 0.3 });
-		setShader(&(lightModels[i]), lightShader);
+		setShader((lightModels[i]), lightShader);
 	}
 	RigidBodyWorldInit(&rw);
 
 	
 	
 	appendObject(&list,  generatePlane(1));
-	glm_translate(list.objects[list.count-1].model, (vec3) { 2, -4.0f, -2 });
-	glm_scale(list.objects[list.count - 1].model, (vec3) { 200.0f, 1.0f, 200.0f });
-	rotateAxis(&list.objects[list.count - 1], 90, (vec3) { 1.0f, 0.0f, 0.0f });
+	glm_translate(list.objects[list.count-1]->model, (vec3) { 2, -4.0f, -2 });
+	glm_scale(list.objects[list.count - 1]->model, (vec3) { 200.0f, 1.0f, 200.0f });
+	rotateAxis(list.objects[list.count - 1], 90, (vec3) { 1.0f, 0.0f, 0.0f });
 	
-	appendObject(&list, fromStlFile("dev.stl"));
-	appendObject(&list, generateSphere());
-	glm_translate(list.objects[list.count - 1].model, (vec3) { -10, -2.9, -10.5 });
-
+	//appendObject(&list, fromStlFile("dev.stl"));
+	//appendObject(&list, generateSphere());
+	//glm_translate(list.objects[list.count - 1]->model, (vec3) { -10, -2.9, -10.5 });
+	
 	appendObject(&list, fromStlFile("cage.stl"));
 	setPos(&list.objects[list.count - 1], (vec3) { -5, -1, -4 });
 	
 	appendObject(&list, fromStlFile("cage.stl"));
-	appendObject(&list, generateSphere());
-	translateGlobal(&list.objects[list.count - 1], (vec3) { -2.5, 3, -1.2 });
-	//list.objects[list.count - 1].rigidBody.lineralVel[1] = -0.01;
-	appendObject(&list, generateSphere());
-	translateGlobal(&list.objects[list.count - 1], (vec3) { -3, 0, -1 });
-
-	appendObject(&list, generateSphere());
-	translateGlobal(&list.objects[list.count - 1], (vec3) { -3.5, 5, -1 });
-
-	appendObject(&list, generateSphere());
-	translateGlobal(&list.objects[list.count - 1], (vec3) { -4.4, 6, -1 });
+	
 	
 	
 	LightSource* ls;
@@ -360,29 +352,16 @@ int main()
 	{
 		appendLigthSource(&ll, *(lights[i]));
 	}
-	
-	
-	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 0,0, 1 });
-	rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
-	rotateAxis(&(list.objects[3]), 45.0, (vec3) { 0,1, 0 });
-	
-	//rotateAxis(&(list.objects[5]), 45.0, (vec3) { 1,0, 0 });
-	//rotateAxis(&(list.objects[3]), 30.0, (vec3) { 1,0, 0 });
-	list.objects[6].rigidBody.lineralVel.axis[1] = -0.01;
 
-	
-	addObjectToWorld(&rw, &(list.objects[14]));
-	addObjectToWorld(&rw, &(list.objects[15]));
-	addObjectToWorld(&rw, &(list.objects[16]));
-	addObjectToWorld(&rw, &(list.objects[17]));
-	
+
 	addSphereObject((vec3) { -4, 9, -1 });
 	addSphereObject((vec3) { -4, 11, -1.1 });
+	addSphereObject((vec3) { -4, 6, -1.1 });
 	
 
-	for(int i=0;i<50;i++)
+	for(int i=0;i<10;i++)
 	{
-		addSphereObject((vec3) { -4+cos(i), 12+1.1*i, -1.1 +sin(i)});
+		addSphereObject((vec3) { -4+1.5*cos(i), 12+1.1*i, -2 +1.5*sin(i)});
 	}
 	
 	printf("finished %g\n", glfwGetTime);
@@ -394,7 +373,9 @@ int main()
 	//addObjectToWorld(&rw, &(list.objects[3]));
 	err = fopen("logfile.txt", "w");
 
-	list.objects[3].rigidBody.lineralVel.axis[1] = -0.2;
+	rotateAxis(list.objects[1], 30, (vec3) { 1, 0, 1 });
+	list.objects[1]->rigidBody.type = TYPE_CUBE;
+	addObjectToWorld(&rw, list.objects[1]);
 	loaded = true;
 	printf("%d\n", initialized);
 	while (!glfwWindowShouldClose(window))
@@ -418,7 +399,7 @@ int main()
 		scene.onUpdate(scene);
 		glm_vec3_rotate(((PointLight*)(ps->lightSrc))->position, 0.2*deltaTime,
 			(vec3) { 0, 1, 0 });
-		setPos(&(lightList.objects[0]), ((PointLight*)(ps->lightSrc))->position);
+		setPos((lightList.objects[0]), ((PointLight*)(ps->lightSrc))->position);
 
 		recalculateShadowsList(standartShader, ps, &list);
 		
@@ -434,18 +415,11 @@ int main()
 
 		
 		renderListLights(standartShader, &ll);
+				
+		updatePhysicsWorld(&rw, deltaTime);
 		
-		//rotateAxis(&(list.objects[3]), 20*deltaTime, (vec3) { 0, 1, 0 });
-		//translateGlobal(&(list.objects[3]), (vec3) { 0, -0.2*deltaTime, 0 });
-
-		if (deltaTime > 0 && loaded)
-		{
-			computeCubeFall((Object*[]) { &(list.objects[4]) }, 1, deltaTime);
-			//Call update physics every frame
-			updatePhysicsWorld(&rw, deltaTime);
-		}
 		renderListObjects(&list);
-		updateCube(&(list.objects[3]), deltaTime);
+		updateCube((list.objects[1]), deltaTime);
 
 		renderListObjects(&lightList);
 
@@ -460,7 +434,7 @@ int main()
 			
 			Vector3 trgt = sub(ldir, diff);
 			gizmosDrawLineV3(vecToVector(pl.selection->position), add(vecToVector(pl.selection->position), trgt));
-			pl.selection->rigidBody.lineralVel = add(pl.selection->rigidBody.lineralVel, vmul(trgt, 0.01));
+			pl.selection->rigidBody.lineralVel = add(pl.selection->rigidBody.lineralVel, vmul(trgt, 3*deltaTime));
 		}
 		//End Draw Calls
 		glfwSwapBuffers(window);
@@ -468,6 +442,7 @@ int main()
 	//glDeleteVertexArrays(1, &containerVAO);
 	//glDeleteBuffers(1, &VBO);
 	glfwTerminate();
+	glfwDestroyWindow(window);
 
 	return 0;
 }

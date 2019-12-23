@@ -188,7 +188,7 @@ void renderLights(Shader* sh, LightSource** ls, int size)
 //Recalculate lighting for single light Source
 //Set shadow map/cubemap data to shader
 //.. Actually renders scene from light's perspective
-void recalculateShadows(Shader* s, LightSource* ls, Object* objects, int count)
+void recalculateShadows(Shader* s, LightSource* ls, Object** objects, int count)
 {
 	// configure depth map FBO
 	// -----------------------
@@ -239,11 +239,11 @@ void recalculateShadowsList(Shader* s, struct LightSource* ls, ListObjects* list
 	recalculateShadows(s, ls, list->objects, list->count);
 }
 
-void renderScene(Shader* shader, Object* objects, int count)
+void renderScene(Shader* shader, Object** objects, int count)
 {
 	for (unsigned int i = 0; i < count; i++)
 	{
-		renderObjectSpecificShader(&(objects[i]), shader);
+		renderObjectSpecificShader((objects[i]), shader);
 		//rotateAxis(&(objects[i]), 0.19f, (vec3) { (i+1)%10, i%10, 0 });
 	}
 }
@@ -251,7 +251,7 @@ void renderListObjects(ListObjects* li)
 {
 	for(int i=0;i<li->count;i++)
 	{
-		li->objects[i].render(&(li->objects[i]));
-		gizmosDrawLineV3(vecToVector(li->objects[i].position), add(vecToVector(li->objects[i].position), li->objects[i].rigidBody.lineralVel));
+		li->objects[i]->render((li->objects[i]));
+		//gizmosDrawLineV3(vecToVector(li->objects[i]->position), add(vecToVector(li->objects[i]->position), li->objects[i]->rigidBody.lineralVel));
 	}
 }

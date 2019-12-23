@@ -162,7 +162,7 @@ float CubeShadowCalculation(vec3 fragPos)
     }
     shadow /= float(samples);
     vec3 fl = normalize(fragToLight);    
-    if(dot(norm, -fl)<0.15)
+    if(dot(norm, -fl)<0.1)
     {
         shadow = 0;
     }

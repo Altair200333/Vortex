@@ -9,8 +9,12 @@
 #include <cglm/types.h>
 #include "vector3.h"
 
+static int TYPE_SPHERE = 1;
+static int TYPE_CUBE = 2;
+
 typedef struct _RigidBody
 {
+	int type;
 	Vector3 angluarVel;
 	Vector3 lineralVel;
 	Vector3 acceleration;
@@ -37,20 +41,21 @@ typedef struct
 
 typedef struct
 {
-	Object* objects;
+	Object** objects;
 	size_t count;
 }ListObjects;
 
 
 void initRigidBody(Object* obj);
-Object* appendObject(ListObjects* o, Object obj);
+Object* appendObject(ListObjects* o, Object* obj);
 void setShader(Object* obj, Shader* shader);
-Object generateCube(float scale);
-Object generateSphere();
-Object generatePlane(float scale);
-Object fromStlFile(char* name);
+Object* generateCube(float scale);
+Object* generateSphere();
+Object* generatePlane(float scale);
+Object* fromStlFile(char* name);
 void rotateAxis(Object* obj, float angle, vec3 axis);
 void rotateAxisV3(Object* obj, float angle, Vector3 axis);
+void rotateAroundAxisV3(Object* obj, float angle, Vector3 axis, Vector3 pivot);
 void setPos(Object* obj, vec3 axis);
 void translateLocal(Object* obj, vec3 shift);
 void translateGlobal(Object* obj, vec3 shift);

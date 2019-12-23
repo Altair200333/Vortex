@@ -41,7 +41,7 @@ void useShader(Shader* shader)
 }
 void checkForShaderCompileErrors(GLuint shader, char* type)
 {
-	GLint success;
+	GLint success=1;
 	GLchar infoLog[1024];
 	
 	glGetProgramiv(shader, GL_COMPILE_STATUS, &success);

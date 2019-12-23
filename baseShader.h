@@ -2,7 +2,7 @@
 #ifndef baseShader_h
 #define baseShader_h
 #include <stdio.h>
-#include <GL/glew.h>; 
+#include <GL/glew.h>
 #include <cglm/cglm.h>
 #include <cglm/mat4.h>
 #include <cglm/types.h>

@@ -2,6 +2,7 @@
 #define PHYSICS_H
 #include "worldObject.h"
 
+
 //collection of all rigid bodies in scene
 typedef struct _RigidBodyWorld
 {

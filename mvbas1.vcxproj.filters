@@ -177,6 +177,9 @@
     <None Include="ico1.stl">
       <Filter>Файлы ресурсов\Models\STL</Filter>
     </None>
+    <None Include="engDemo.stl">
+      <Filter>Файлы ресурсов\Models\STL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="ARIAL.TTF">
