@@ -8,7 +8,7 @@
 #include "vector3.h"
 #include <assert.h>
 
-void initRigidBody(Object* obj)
+void initRigidBody(Object* obj, int type)
 {
 	obj->rigidBody.type = TYPE_SPHERE;
 	for (int i = 0; i < 3; i++)
@@ -18,10 +18,10 @@ void initRigidBody(Object* obj)
 	for (int i = 0; i < 3; i++)
 		obj->rigidBody.lineralVel.axis[i] = 0;
 	obj->rigidBody.mass = 1;
-	obj->rigidBody.alpha = 0;
+	obj->rigidBody.bounciness = type==TYPE_CUBE?1.2f : 1.4f;
 	obj->rigidBody.theta = 0;
-	obj->rigidBody.omega = 0;
-	obj->rigidBody.J = 1;
+	obj->rigidBody.friction = type == TYPE_CUBE ? 0.02:0.001;
+	obj->rigidBody.J = type==TYPE_CUBE? 1.1f : 1.0f;
 }
 
 void setColor(Object* obj, vec3 color)
@@ -104,7 +104,7 @@ Object* generateCube(float scale)
 
 	setProp(obj, cubeVert, 36);
 	
-	initRigidBody(obj);
+	initRigidBody(obj, TYPE_CUBE);
 	glGenVertexArrays(1, &obj->VAO);
 	glGenBuffers(1, &obj->VBO);
 
@@ -243,7 +243,7 @@ Object* generatePlane(float scale)
 	0 };*/
 
 	setProp(obj, PlaneVert, 6);
-	initRigidBody(&obj);
+	initRigidBody(&obj, TYPE_CUBE);
 	glGenVertexArrays(1, &obj->VAO);
 	glGenBuffers(1, &obj->VBO);
 
@@ -379,7 +379,7 @@ Object* fromStlFile(char* name)
 	obj->color[1] = 0.4f;
 	obj->color[2] = 0.4f;
 	obj->render = &renderObjectStandart;
-	initRigidBody(&obj);
+	initRigidBody(&obj, TYPE_CUBE);
 	return obj;
 }
 void setPos(Object* obj, vec3 axis)
@@ -446,6 +446,6 @@ Object* generateSphere()
 
 	obj->render = &renderObjectStandart;
 	
-	initRigidBody(obj);
+	initRigidBody(obj, TYPE_SPHERE);
 	return obj;
 }

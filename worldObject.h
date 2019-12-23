@@ -20,8 +20,8 @@ typedef struct _RigidBody
 	Vector3 acceleration;
 	float mass;
 	float theta;
-	float omega;
-	float alpha;
+	float friction;
+	float bounciness;
 	float J;
 }RigidBody;
 typedef struct
@@ -46,7 +46,7 @@ typedef struct
 }ListObjects;
 
 
-void initRigidBody(Object* obj);
+void initRigidBody(Object* obj, int type);
 Object* appendObject(ListObjects* o, Object* obj);
 void setShader(Object* obj, Shader* shader);
 Object* generateCube(float scale);

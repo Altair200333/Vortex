@@ -378,9 +378,10 @@ int main()
 	addObjectToWorld(&rw, list.objects[1]);
 	loaded = true;
 	printf("%d\n", initialized);
+	int count = 0;
 	while (!glfwWindowShouldClose(window))
 	{
-		
+		//printf("frame %d started\n", count);
 		float currentFrame = glfwGetTime();
 		deltaTime = (currentFrame - lastFrame)*timeScale;
 		lastFrame = currentFrame;
@@ -435,9 +436,12 @@ int main()
 			Vector3 trgt = sub(ldir, diff);
 			gizmosDrawLineV3(vecToVector(pl.selection->position), add(vecToVector(pl.selection->position), trgt));
 			pl.selection->rigidBody.lineralVel = add(pl.selection->rigidBody.lineralVel, vmul(trgt, 3*deltaTime));
+			translateGlobalV3(pl.selection, vmul(trgt, 0.2 * deltaTime));
+			pl.selection->rigidBody.lineralVel = add(pl.selection->rigidBody.lineralVel, vmul(pl.selection->rigidBody.lineralVel, -0.01));
 		}
 		//End Draw Calls
 		glfwSwapBuffers(window);
+		//printf("frame %d ended\n", count++);
 	}
 	//glDeleteVertexArrays(1, &containerVAO);
 	//glDeleteBuffers(1, &VBO);
