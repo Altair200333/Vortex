@@ -123,7 +123,11 @@ void movePlayer(Player* pl,  GLFWwindow* window, float deltaTime, float Fspeed, 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !Rdown)
 	{
 		Rdown = true;
-
+		Object* object = generateSphere();
+		translateGlobalV3(object, add(vecToVector(pl->eye), vmul(vecToVector(pl->dir), 1.5f)));
+		appendObject(scene->sceneObjects, object);
+		addObjectToWorld(scene->rigidBodyWorld, object);
+		object->rigidBody.lineralVel = vmul(vecToVector(pl->dir), 8.5f);
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && Rdown)
 	{

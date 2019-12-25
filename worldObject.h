@@ -12,6 +12,7 @@
 static int TYPE_SPHERE = 1;
 static int TYPE_CUBE = 2;
 
+typedef struct _Collision(*findCollision)(struct _Object* a, struct _Object* b, int count);
 typedef struct _RigidBody
 {
 	int type;
@@ -25,6 +26,8 @@ typedef struct _RigidBody
 	float angularFriction;
 	float J;
 	float Jmul;
+	bool isKinematic;
+	findCollision findContact;
 }RigidBody;
 typedef struct
 {
@@ -39,6 +42,7 @@ typedef struct
 	vec3 color;
 	void(*render)(Object);
 	RigidBody rigidBody;
+	bool wasAllocated;
 }Object;
 
 typedef struct

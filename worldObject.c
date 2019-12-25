@@ -7,6 +7,7 @@
 #include <string.h>
 #include "vector3.h"
 #include <assert.h>
+#include "physics.h"
 
 void initRigidBody(Object* obj, int type)
 {
@@ -22,8 +23,10 @@ void initRigidBody(Object* obj, int type)
 	obj->rigidBody.angularSaver = type == TYPE_CUBE ? 1:0;
 	obj->rigidBody.angularFriction = type == TYPE_CUBE ? 0.002 : 0.02;
 	obj->rigidBody.friction = type == TYPE_CUBE ? 0.02:0.001;
-	obj->rigidBody.J = type==TYPE_CUBE? 1.5f : 1.0f;
-	obj->rigidBody.Jmul = type==TYPE_CUBE? 8.0f : 100.0f;
+	obj->rigidBody.J = type==TYPE_CUBE? 1.9f : 1.0f;
+	obj->rigidBody.Jmul = type==TYPE_CUBE? 11.0f : 100.0f;
+	obj->rigidBody.isKinematic = false;
+	obj->rigidBody.findContact = type == TYPE_CUBE? collideCube : collideSphere;
 }
 
 void setColor(Object* obj, vec3 color)
@@ -105,7 +108,7 @@ Object* generateCube(float scale)
 	Object* obj = (Object*)malloc(sizeof(Object));
 
 	setProp(obj, cubeVert, 36);
-	
+	obj->wasAllocated = false;
 	initRigidBody(obj, TYPE_CUBE);
 	glGenVertexArrays(1, &obj->VAO);
 	glGenBuffers(1, &obj->VBO);
@@ -242,6 +245,7 @@ Object* generatePlane(float scale)
 	count*0.5, NULL,
 	{1.0f, 0.5f, 0.31f},
 	0 };*/
+	obj->wasAllocated = false;
 
 	setProp(obj, PlaneVert, 6);
 	initRigidBody(&obj, TYPE_CUBE);
@@ -361,6 +365,7 @@ Object* fromStlFile(char* name)
 	
 	Object* obj = (Object*)malloc(sizeof(Object));
 	setProp(obj, vert, CurSize / 2);
+	obj->wasAllocated = true;
 
 	glGenVertexArrays(1, &obj->VAO);
 	glGenBuffers(1, &obj->VBO);
@@ -427,6 +432,7 @@ Object* generateSphere()
 		count*0.5, NULL,
 		{1.0f, 0.5f, 0.31f},
 		0 };*/
+	obj->wasAllocated = false;
 
 	setProp(obj, sphereVert, count*0.5);
 	assert(!isnan(obj->rigidBody.lineralVel.axis[0]));

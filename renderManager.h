@@ -32,6 +32,7 @@ void renderListLights(Shader* sh, struct LightList* list);
 
 void recalculateShadows(Shader* s, struct LightSource* ls, Object** objects, int count);
 void recalculateShadowsList(Shader* s, struct LightSource* ls, ListObjects* list);
+void recalculateShadowsListAtList(Shader* s, struct LightList* ls, ListObjects* list);
 void renderScene(Shader* shader, Object* objects, int count);
 
 #endif

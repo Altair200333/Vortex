@@ -6,6 +6,14 @@
 #include <cglm/types.h>
 #include "gizmos.h"
 
+void initGLProperties()
+{
+	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
+}
 GLFWwindow* initWindow(int width, int height)
 {
 	//Инициализация GLFW
@@ -42,7 +50,7 @@ GLFWwindow* initWindow(int width, int height)
 	glViewport(0, 0, width, height);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+	initGLProperties();
 	return window;
 }
 
@@ -192,6 +200,8 @@ void recalculateShadows(Shader* s, LightSource* ls, Object** objects, int count)
 {
 	// configure depth map FBO
 	// -----------------------
+	if(ls->type != TYPE_POINT_LIGHT)
+		return;
 	PointLight* pl = (PointLight*)(ls->lightSrc);
 	bindShadowTransform(pl);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -238,7 +248,11 @@ void recalculateShadowsList(Shader* s, struct LightSource* ls, ListObjects* list
 {
 	recalculateShadows(s, ls, list->objects, list->count);
 }
-
+void recalculateShadowsListAtList(Shader* s, LightList* ls, ListObjects* list)
+{
+	for(int i=0;i<ls->count;i++	)
+		recalculateShadows(s, ls->lights[i], list->objects, list->count);
+}
 void renderScene(Shader* shader, Object** objects, int count)
 {
 	for (unsigned int i = 0; i < count; i++)

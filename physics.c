@@ -7,7 +7,7 @@
 #include <assert.h>
 
 //Every collision creates counteracting impulse applying to body
-void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 normal, float normVel2);
+void resolveContact(Object* obj, Vector3 middle, int collisionCount, Vector3 normal, float normVel2);
 void computeCubeFall(Object* obj[], size_t count, float deltaTime)
 {
 	vec3 Force = { 0, -9.8f, 0 };
@@ -74,35 +74,18 @@ void collideObj(Object* obj, Vector3 normal)
 
 Vector3 collide(int ind, Object* obj[], size_t count)
 {
-	float floorHeight = -3;
-	if (obj[ind]->position[1] < floorHeight)
-	{
-		//collideObj(obj[ind], (Vector3) { 0, floorHeight - obj[ind]->position[1], 0 });
-		resolveCollision(obj[ind], (Vector3) { obj[ind]->position[0], obj[ind]->position[1] - 0.5, obj[ind]->position[2]}, 1,
-			(Vector3) {0, floorHeight - obj[ind]->position[1], 0}, 0);
-	}
+	Collision col = obj[ind]->rigidBody.findContact(obj[ind], NULL, 0);
+	resolveCollision(obj[ind], col);
+
 	for (int i = ind; i < count; i++)
 	{
 		if (i != ind)
 		{
-			Vector3 diff = sub(vecToVector(obj[ind]->position), vecToVector(obj[i]->position));
-			if (sqMagnitude(diff) <= 1 && obj[i]->rigidBody.type != TYPE_CUBE)
-			{
-				Vector3 rad = vmul(normalized(diff), 0.5f);
-				Vector3 x = sub(diff, rad);
-				diff = sub(diff, vmul(x, 2));
-				//gizmosDrawLineV3(vecToVector(obj[ind]->position), add(vecToVector(obj[ind]->position), diff));
-				
-				float cosa = dot(obj[i]->rigidBody.lineralVel, normalized(diff)) / magnitude(obj[i]->rigidBody.lineralVel);
-				resolveCollision(obj[ind], add(vecToVector(obj[ind]->position), vmul(rad,-1)), 1,
-					diff, magnitude(obj[i]->rigidBody.lineralVel)*cosa);
-
-				cosa = dot(obj[ind]->rigidBody.lineralVel, normalized(vmul(diff, -1))) / magnitude(obj[ind]->rigidBody.lineralVel);
-				resolveCollision(obj[i], add(vecToVector(obj[i]->position), vmul(rad, 1)), 1,
-					vmul(diff, -1), cosa*magnitude(obj[ind]->rigidBody.lineralVel));
-				//collideObj(obj[ind], diff);
-				//collideObj(obj[i], vmul(diff,-1));
-			}
+			
+			col = obj[i]->rigidBody.findContact(obj[i], obj[ind], 1);
+			Collision col2 = obj[ind]->rigidBody.findContact(obj[ind], obj[i], 1);
+			resolveCollision(obj[i], col);
+			resolveCollision(obj[ind], col2);
 		}
 	}
 	return (Vector3){0,0,0};
@@ -110,7 +93,7 @@ Vector3 collide(int ind, Object* obj[], size_t count)
 
 void applyGravity(Object* obj, float deltaTime)
 {
-	Vector3 force = { 0,-4.8, 0 };
+	Vector3 force = { 0,-9.8, 0 };
 	Vector3 vv = vmul(obj->rigidBody.lineralVel, 0.6);
 	force = sub(force, vv);
 
@@ -130,20 +113,20 @@ void updateBodiesInWorld(Object* obj[], size_t count, float deltaTime)
 	{
 		if (obj[i]->rigidBody.type != TYPE_CUBE)
 		{
-			
-
 			Vector3 normal = collide(i, obj, count);
-
 		}
 		if (obj[i]->rigidBody.type == TYPE_CUBE)
 		{
-			updateCube(obj[i], deltaTime);
+			Collision col = obj[i]->rigidBody.findContact(obj[i], NULL, 0);
+			resolveCollision(obj[i], col);
 		}
-		applyGravity(obj[i], deltaTime);
-
-		translateGlobalV3(obj[i], vmul(obj[i]->rigidBody.lineralVel, deltaTime));
-		if (sqMagnitude(obj[i]->rigidBody.angluarVel) > treshold)
-			rotateAxisV3(obj[i], magnitude(obj[i]->rigidBody.angluarVel)*deltaTime * obj[i]->rigidBody.Jmul, obj[i]->rigidBody.angluarVel);
+		if (!obj[i]->rigidBody.isKinematic)
+		{
+			applyGravity(obj[i], deltaTime);
+			translateGlobalV3(obj[i], vmul(obj[i]->rigidBody.lineralVel, deltaTime));
+			if (sqMagnitude(obj[i]->rigidBody.angluarVel) > treshold)
+				rotateAxisV3(obj[i], magnitude(obj[i]->rigidBody.angluarVel)*deltaTime * obj[i]->rigidBody.Jmul, obj[i]->rigidBody.angluarVel);
+		}
 	}
 
 }
@@ -205,22 +188,30 @@ Object* castRayToRigidBodies(Vector3 start, Vector3 dir, RigidBodyWorld* rw)
 	}
 	return minId==-1? NULL : rw->items[minId];
 }
-void addObjectVel(Vector3 pos, Vector3 initVel, ListObjects* list, RigidBodyWorld* rw)
-{
-	appendObject(list, generateSphere());
-	translateGlobalV3(&list->objects[list->count - 1], pos);
-	addObjectToWorld(rw, &(list->objects[list->count - 1]));
-	for (int i = 0; i < 3; i++)
-		list->objects[list->count - 1]->rigidBody.lineralVel.axis[i] = initVel.axis[i];
-}
 
 vec3 ver[] = { {-0.5, -0.5, -0.5}, {0.5, -0.5, -0.5}, {0.5, 0.5, -0.5}, {0.5, 0.5, 0.5}, {-0.5, 0.5, 0.5}, {-0.5, -0.5, 0.5},{0.5, -0.5, 0.5}, {-0.5, 0.5, -0.5} };
 
-void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 normal, float normVel2)
+void resolveCollision(Object* obj, Collision collision)
+{
+	for (int k = 0; k < collision.collisionsCount; k++)
+	{
+
+		Vector3 middle = { 0,0,0 };
+		for (int j = 0; j < collision.collisions[k].contactsCount; j++)
+		{
+			middle = add(collision.collisions[k].contacts[j], middle);
+		}
+		resolveContact(obj, middle, collision.collisions[k].contactsCount, collision.collisions[k].normal, collision.collisions[k].normVel);
+	}
+}
+void resolveContact(Object* obj, Vector3 middle, int collisionCount, Vector3 normal, float normVel2)
 {
 	float cosa = dot(obj->rigidBody.lineralVel, normalized(normal)) / magnitude(obj->rigidBody.lineralVel);
 	Vector3 normalVelocity = vmul(normalized(normal), cosa*magnitude(obj->rigidBody.lineralVel));
-	
+	if (obj->rigidBody.isKinematic)
+	{
+		return;
+	}
 	if (collisionCount > 0)
 	{
 		if (sqMagnitude(normal) > 0.25)
@@ -254,12 +245,8 @@ void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 n
 		if (dot(obj->rigidBody.lineralVel, normal) < 0)
 		{
 			obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, normalVelocity);
-			obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, vmul(normalized(normal), -normVel2));
-			if(normVel2!=0)
-				printf("%g\n", normVel2);
-			//obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, 
-			//	vmul(normalized(normalVelocity), (magnitude(normalVelocity)-normVel2)));
 		}
+		obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, vmul(normalized(normal), fabs(normVel2)/5));
 		obj->rigidBody.lineralVel = sub(obj->rigidBody.lineralVel, vmul(tanVelocity, 0.02));
 
 		Vector3 tanAngularVelocity = cross(normalized(normal), obj->rigidBody.angluarVel);
@@ -267,45 +254,76 @@ void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 n
 		obj->rigidBody.lineralVel = sub(obj->rigidBody.lineralVel, vmul(tanAngularVelocity, obj->rigidBody.angularFriction));
 	}
 }
-void updateCube(Object* obj, float dt)
+
+void addForce(Object* obj, Vector3 force, float dt)
 {
-	vec3 collisions[4];
-	int collisionCount=0;
+	if(!obj->rigidBody.isKinematic)
+		obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, vmul(force, dt));
+}
+Collision collideCube(Object* obj, Object* obj2, int count)
+{
+	Collision col;
+	col.collisionsCount = 0;
 	
-	
+
 	vec3 localVertexPos;
 	vec3 vertexPos;
+	col.collisions[col.collisionsCount].contactsCount = 0;
 	for (int i = 0; i < 8; i++)
 	{
-		
 		glm_mat4_mulv3(obj->model, ver[i], 0, localVertexPos);
 		glm_vec3_add(obj->position, localVertexPos, vertexPos);
-		if(vertexPos[1]<-3.5f && collisionCount<4)
-		{	
-			glm_vec3_copy(vertexPos, collisions[collisionCount]);
-			collisionCount++;
+		if (vertexPos[1] < -3.5f && col.collisions[col.collisionsCount].contactsCount < 4)
+		{
+			col.collisions[col.collisionsCount].contacts[col.collisions[col.collisionsCount].contactsCount] = vecToVector(vertexPos);
+			col.collisions[col.collisionsCount].contactsCount++;		
 		}
 	}
-	Vector3 middle = {0,0,0};
-	for(int i=0;i<collisionCount;i++)
+	if (col.collisions[0].contactsCount > 0)
 	{
-		vec3 up;
-		glm_vec3_add(collisions[i], (vec3) { 0, 0.3f, 0 }, up);
-		gizmosDrawLine(collisions[i], up);
-
-		middle = add(vecToVector(collisions[i]), middle);
+		float tr = -3.5f - col.collisions[0].contacts[0].axis[1];
+		col.collisions[0].normal = (Vector3) { 0, tr, 0 };
+		col.collisionsCount++;
+		col.collisions[0].normVel = 0;
 	}
-	if(collisionCount>0)
+	return col;
+}
+Collision collideSphere(Object* obj, Object* obj2, int count)
+{
+	Collision col;
+	col.collisionsCount = 0;
+	float floorHeight = -3;
+	if (count == 0)
 	{
-		float tr = -3.5f - collisions[0][1];
-		//translateGlobalV3(obj, (Vector3) { 0, tr, 0 });
-		resolveCollision(obj, middle, collisionCount, (Vector3) { 0, tr, 0 }, 0);
+		if (obj->position[1] < floorHeight)
+		{
+			
+			col.collisions[col.collisionsCount].normal = (Vector3) { 0, floorHeight - obj->position[1], 0 };
+			col.collisions[col.collisionsCount].contacts[0] = (Vector3) { obj->position[0], obj->position[1] - 0.5, obj->position[2] };
+			col.collisions[col.collisionsCount].contactsCount = 1;
+			col.collisions[col.collisionsCount].normVel = 0;
+			col.collisionsCount++;
+		}
+		return col;
+	}
+	Vector3 diff = sub(vecToVector(obj2->position), vecToVector(obj->position));
+	if (sqMagnitude(diff) <= 1 && obj->rigidBody.type != TYPE_CUBE)
+	{
+		Vector3 rad = vmul(normalized(diff), 0.5f);
+		Vector3 x = sub(diff, rad);
+		diff = sub(diff, vmul(x, 2));
+		//gizmosDrawLineV3(vecToVector(obj[ind]->position), add(vecToVector(obj[ind]->position), diff));
+
+		float vel = magnitude(obj2->rigidBody.lineralVel);
+		float cosa = vel > 0 ? dot(obj2->rigidBody.lineralVel, normalized(vmul(diff, -1))) / magnitude(obj2->rigidBody.lineralVel) : 0;
+
+		col.collisions[col.collisionsCount].normal = vmul(diff, -1);
+		col.collisions[col.collisionsCount].contacts[0] = add(vecToVector(obj->position), vmul(rad, 1));
+		col.collisions[col.collisionsCount].contactsCount=1;
+		col.collisions[col.collisionsCount].normVel = cosa * magnitude(obj2->rigidBody.lineralVel);
+		col.collisionsCount++;
 
 	}
-	
+	return col;
 
-	obj->rigidBody.angluarVel = vmul(obj->rigidBody.angluarVel, 0.999f);
-	printf("11 %d\n",dt);
-
-	//printf("%g\n", sqMagnitude(obj->rigidBody.angluarVel));
 }
