@@ -113,7 +113,7 @@ void onStart(Scene* scene)
 	}
 	
 	appendObject(scene->sceneObjects, fromStlFile("engDemo.stl"));
-	translateGlobalV3(scene->sceneObjects->objects[scene->sceneObjects->count - 1], (Vector3) { 1, 0, -11 });
+	translateGlobalV3(scene->sceneObjects->objects[scene->sceneObjects->count - 1], (Vector3) { -3, 0, -11 });
 
 	appendObject(scene->sceneObjects, fromStlFile("control.stl"));
 	translateGlobalV3(scene->sceneObjects->objects[scene->sceneObjects->count - 1], (Vector3) { 7, 0, -7 });

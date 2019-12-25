@@ -84,8 +84,6 @@ int main()
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	
-	err = fopen("logfile.txt", "w");
-
 	//create scene instance
 	Scene scene;
 	initScene(&scene,window, onUpdate, onStart);
@@ -112,5 +110,7 @@ int main()
 	glfwTerminate();
 	glfwDestroyWindow(window);
 	freeScene(&scene);
+	free(standartShader);
+	free(lightShader);
 	return 0;
 }

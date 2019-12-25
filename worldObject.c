@@ -24,7 +24,7 @@ void initRigidBody(Object* obj, int type)
 	obj->rigidBody.angularFriction = type == TYPE_CUBE ? 0.002 : 0.02;
 	obj->rigidBody.friction = type == TYPE_CUBE ? 0.02:0.001;
 	obj->rigidBody.J = type==TYPE_CUBE? 1.9f : 1.0f;
-	obj->rigidBody.Jmul = type==TYPE_CUBE? 11.0f : 100.0f;
+	obj->rigidBody.Jmul = type==TYPE_CUBE? 7.0f : 100.0f;
 	obj->rigidBody.isKinematic = false;
 	obj->rigidBody.findContact = type == TYPE_CUBE? collideCube : collideSphere;
 }
@@ -106,7 +106,7 @@ GLfloat cubeVert[] = {
 Object* generateCube(float scale)
 {
 	Object* obj = (Object*)malloc(sizeof(Object));
-
+	assert(obj != NULL);
 	setProp(obj, cubeVert, 36);
 	obj->wasAllocated = false;
 	initRigidBody(obj, TYPE_CUBE);
@@ -238,13 +238,7 @@ Object* generatePlane(float scale)
 
 
 	Object* obj = (Object*)malloc(sizeof(Object));
-	/*{ 0,0, {  1, 0, 0, 0,
-				0, 1, 0, 0,
-				0, 0, 1, 0,
-				0, 0, 0, 1 }, {0,0,0},{0,0,0 }, vert,
-	count*0.5, NULL,
-	{1.0f, 0.5f, 0.31f},
-	0 };*/
+	assert(obj != NULL);
 	obj->wasAllocated = false;
 
 	setProp(obj, PlaneVert, 6);
@@ -284,7 +278,7 @@ Object* fromStlFile(char* name)
 		}
 	}
 	GLfloat *vert = (GLfloat*)malloc(sizeof(GLfloat)*length);
-	
+	assert(vert != NULL);
 	fseek(fp, 0, SEEK_SET);
 	char x[1024];
 	/* assumes no word exceeds length of 1023 */
@@ -364,6 +358,7 @@ Object* fromStlFile(char* name)
 	//}
 	
 	Object* obj = (Object*)malloc(sizeof(Object));
+	assert(obj != NULL);
 	setProp(obj, vert, CurSize / 2);
 	obj->wasAllocated = true;
 
@@ -406,12 +401,14 @@ Object* appendObject(ListObjects* o, Object* obj)
 	if(o->objects == NULL)
 	{
 		o->objects = (Object**)malloc(sizeof(Object*));
+		assert(o->objects != NULL);
 		o->count = 1;
 		o->objects[0] = obj;
 	}
 	else
 	{
 		o->objects = (Object**)realloc(o->objects, sizeof(Object*)*(o->count+1));
+		assert(o->objects != NULL);
 		o->objects[o->count] = obj;
 		o->count++;
 	}
@@ -425,13 +422,7 @@ Object* generateSphere()
 	int count = 5760;
 
 	Object* obj = (Object*)malloc(sizeof(Object));
-		/*{ 0,0, {  1, 0, 0, 0,
-					0, 1, 0, 0,
-					0, 0, 1, 0,
-					0, 0, 0, 1 }, {0,0,0},{0,0,0 }, vert,
-		count*0.5, NULL,
-		{1.0f, 0.5f, 0.31f},
-		0 };*/
+	assert(obj != NULL);
 	obj->wasAllocated = false;
 
 	setProp(obj, sphereVert, count*0.5);

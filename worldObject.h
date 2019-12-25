@@ -12,7 +12,7 @@
 static int TYPE_SPHERE = 1;
 static int TYPE_CUBE = 2;
 
-typedef struct _Collision(*findCollision)(struct _Object* a, struct _Object* b, int count);
+typedef struct _Collision(*findCollision)(struct _Object* a, struct _Object* b);
 typedef struct _RigidBody
 {
 	int type;

@@ -42,7 +42,7 @@ void addObjectVel(Vector3 pos, Vector3 initVel, ListObjects* list, RigidBodyWorl
 void updateCube(Object* obj, float dt);
 void addForce(Object* obj, Vector3 force, float dt);
 void resolveCollision(Object* obj, Collision contact);
-Collision collideCube(Object* obj, Object* obj2, int count);
-Collision collideSphere(Object* obj, Object* obj2, int count);
+Collision collideCube(Object* obj, Object* obj2);
+Collision collideSphere(Object* obj, Object* obj2);
 #endif
 

@@ -2,6 +2,7 @@
 #include "baseShader.h"
 #include <stdio.h>
 #include "renderManager.h"
+#include <assert.h>
 
 
 char* getShaderFromFile(const char* shaderPath)
@@ -20,6 +21,7 @@ char* getShaderFromFile(const char* shaderPath)
 			length++;
 		}
 		buffer = (char*)malloc(sizeof(char)*(length+1));
+		assert(buffer != NULL);
 		fseek(f, 0, SEEK_SET);
 
 		while ((ch = getc(f)) != EOF)
@@ -96,6 +98,7 @@ Shader* generateShaderVertFrag(const GLchar* vertexPath, const GLchar* fragmentP
 	//Shader programm
 	Shader* shader;
 	shader = (Shader*)malloc(sizeof(Shader));
+	assert(shader != NULL);
 	shader->Program= glCreateProgram();
 	glAttachShader(shader->Program, vertexShader);
 	glAttachShader(shader->Program, fragmentShader);
@@ -139,6 +142,7 @@ Shader* generateShaderVertFragGeom(const GLchar* vertexPath, const GLchar* fragm
 	// shader Program
 	Shader* shader;
 	shader = (Shader*)malloc(sizeof(Shader));
+	assert(shader != NULL);
 	shader->Program = glCreateProgram();
 	glAttachShader(shader->Program, vertex);
 	glAttachShader(shader->Program, fragment);

@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include <assert.h>
 
 void initScene(Scene* scene, GLFWwindow* window, void(*onUpdate)(Scene), void(*onStart)(Scene))
 {
@@ -10,10 +11,12 @@ void initScene(Scene* scene, GLFWwindow* window, void(*onUpdate)(Scene), void(*o
 	scene->onUpdate= onUpdate;
 	
 	scene->sceneObjects = (ListObjects*)malloc(sizeof(ListObjects));
+	assert(scene->sceneObjects != NULL);
 	scene->sceneObjects->count = 0;
 	scene->sceneObjects->objects = 0;
 	
 	scene->rigidBodyWorld = (RigidBodyWorld*)malloc(sizeof(RigidBodyWorld));
+	assert(scene->rigidBodyWorld != NULL);
 	RigidBodyWorldInit(scene->rigidBodyWorld);
 }
 void freeScene(Scene* scene)
