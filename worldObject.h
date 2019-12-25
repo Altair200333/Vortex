@@ -19,10 +19,12 @@ typedef struct _RigidBody
 	Vector3 lineralVel;
 	Vector3 acceleration;
 	float mass;
-	float theta;
+	float angularSaver;
 	float friction;
 	float bounciness;
+	float angularFriction;
 	float J;
+	float Jmul;
 }RigidBody;
 typedef struct
 {

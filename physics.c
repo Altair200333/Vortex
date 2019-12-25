@@ -7,7 +7,7 @@
 #include <assert.h>
 
 //Every collision creates counteracting impulse applying to body
-void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 normal);
+void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 normal, float normVel2);
 void computeCubeFall(Object* obj[], size_t count, float deltaTime)
 {
 	vec3 Force = { 0, -9.8f, 0 };
@@ -79,7 +79,7 @@ Vector3 collide(int ind, Object* obj[], size_t count)
 	{
 		//collideObj(obj[ind], (Vector3) { 0, floorHeight - obj[ind]->position[1], 0 });
 		resolveCollision(obj[ind], (Vector3) { obj[ind]->position[0], obj[ind]->position[1] - 0.5, obj[ind]->position[2]}, 1,
-			(Vector3) {0, floorHeight - obj[ind]->position[1], 0});
+			(Vector3) {0, floorHeight - obj[ind]->position[1], 0}, 0);
 	}
 	for (int i = ind; i < count; i++)
 	{
@@ -92,10 +92,14 @@ Vector3 collide(int ind, Object* obj[], size_t count)
 				Vector3 x = sub(diff, rad);
 				diff = sub(diff, vmul(x, 2));
 				//gizmosDrawLineV3(vecToVector(obj[ind]->position), add(vecToVector(obj[ind]->position), diff));
+				
+				float cosa = dot(obj[i]->rigidBody.lineralVel, normalized(diff)) / magnitude(obj[i]->rigidBody.lineralVel);
 				resolveCollision(obj[ind], add(vecToVector(obj[ind]->position), vmul(rad,-1)), 1,
-					diff);
+					diff, magnitude(obj[i]->rigidBody.lineralVel)*cosa);
+
+				cosa = dot(obj[ind]->rigidBody.lineralVel, normalized(vmul(diff, -1))) / magnitude(obj[ind]->rigidBody.lineralVel);
 				resolveCollision(obj[i], add(vecToVector(obj[i]->position), vmul(rad, 1)), 1,
-					vmul(diff, -1));
+					vmul(diff, -1), cosa*magnitude(obj[ind]->rigidBody.lineralVel));
 				//collideObj(obj[ind], diff);
 				//collideObj(obj[i], vmul(diff,-1));
 			}
@@ -113,7 +117,7 @@ void applyGravity(Object* obj, float deltaTime)
 	obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, vmul(force, deltaTime*0.3f / obj->rigidBody.mass));
 }
 
-void computeSomething(Object* obj[], size_t count, float deltaTime)
+void updateBodiesInWorld(Object* obj[], size_t count, float deltaTime)
 {
 	
 	vec3 Force = { 0, -9.8f, 0 };
@@ -130,12 +134,16 @@ void computeSomething(Object* obj[], size_t count, float deltaTime)
 
 			Vector3 normal = collide(i, obj, count);
 
-			applyGravity(obj[i], deltaTime);
-
-			translateGlobalV3(obj[i], vmul(obj[i]->rigidBody.lineralVel, deltaTime));
-			if (sqMagnitude(obj[i]->rigidBody.angluarVel) > treshold)
-				rotateAxisV3(obj[i], magnitude(obj[i]->rigidBody.angluarVel)*deltaTime * 100, obj[i]->rigidBody.angluarVel);
 		}
+		if (obj[i]->rigidBody.type == TYPE_CUBE)
+		{
+			updateCube(obj[i], deltaTime);
+		}
+		applyGravity(obj[i], deltaTime);
+
+		translateGlobalV3(obj[i], vmul(obj[i]->rigidBody.lineralVel, deltaTime));
+		if (sqMagnitude(obj[i]->rigidBody.angluarVel) > treshold)
+			rotateAxisV3(obj[i], magnitude(obj[i]->rigidBody.angluarVel)*deltaTime * obj[i]->rigidBody.Jmul, obj[i]->rigidBody.angluarVel);
 	}
 
 }
@@ -169,7 +177,7 @@ void addObjectToWorld(RigidBodyWorld* rw, Object* obj)
 }
 void updatePhysicsWorld(RigidBodyWorld* rw, float deltaTime)
 {
-	computeSomething(rw->items, rw->size, deltaTime);
+	updateBodiesInWorld(rw->items, rw->size, deltaTime);
 }
 void RigidBodyWorldInit(RigidBodyWorld* rw)
 {
@@ -208,13 +216,15 @@ void addObjectVel(Vector3 pos, Vector3 initVel, ListObjects* list, RigidBodyWorl
 
 vec3 ver[] = { {-0.5, -0.5, -0.5}, {0.5, -0.5, -0.5}, {0.5, 0.5, -0.5}, {0.5, 0.5, 0.5}, {-0.5, 0.5, 0.5}, {-0.5, -0.5, 0.5},{0.5, -0.5, 0.5}, {-0.5, 0.5, -0.5} };
 
-void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 normal)
+void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 normal, float normVel2)
 {
 	float cosa = dot(obj->rigidBody.lineralVel, normalized(normal)) / magnitude(obj->rigidBody.lineralVel);
 	Vector3 normalVelocity = vmul(normalized(normal), cosa*magnitude(obj->rigidBody.lineralVel));
 	
 	if (collisionCount > 0)
 	{
+		if (sqMagnitude(normal) > 0.25)
+			normal = vmul(normalized(normal), 0.25);
 		translateGlobalV3(obj, normal);
 	}
 	if (collisionCount > 0 && collisionCount < 3)
@@ -226,27 +236,35 @@ void resolveCollision(Object* obj, Vector3 middle, int collisionCount, Vector3 n
 				sub(middle, vecToVector(obj->position)));
 		//gizmosDrawLineV3(middle, add(middle, rot));
 		
-		obj->rigidBody.angluarVel = add(vmul(obj->rigidBody.angluarVel, 0.7), rot);
+		obj->rigidBody.angluarVel = add(vmul(obj->rigidBody.angluarVel, 0.6), rot);
 		//rotateAroundAxisV3(obj, dt*sqMagnitude(rot), rot, middle);
 
 	}
 	if (collisionCount > 0)
 	{
 		float k = obj->rigidBody.bounciness;
-		Vector3 up = vmul(normalized(normal), -k * cosa*magnitude(obj->rigidBody.lineralVel));
-		Vector3 tan = sub(obj->rigidBody.lineralVel, vmul(up, 1.0f / k));
+		Vector3 normalVelocity = vmul(normalized(normal), -k * cosa*magnitude(obj->rigidBody.lineralVel));
+		Vector3 tanVelocity = sub(obj->rigidBody.lineralVel, vmul(normalVelocity, 1.0f / k));
 		
-		gizmosDrawLineV3(vecToVector(obj->position), add(vecToVector(obj->position), up));
+		gizmosDrawLineV3(vecToVector(obj->position), add(vecToVector(obj->position), normalVelocity));
 		
-		Vector3 tanXg = cross(tan, vmul(normalized(normal), -obj->rigidBody.J));
-		obj->rigidBody.angluarVel = tanXg;// add(tanXg, obj->rigidBody.angluarVel);
+		Vector3 tanXg = cross(tanVelocity, vmul(normalized(normal), -obj->rigidBody.J));
+		obj->rigidBody.angluarVel =  add(tanXg, vmul(obj->rigidBody.angluarVel, obj->rigidBody.angularSaver));
 
-		obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, up);
-		obj->rigidBody.lineralVel = sub(obj->rigidBody.lineralVel, vmul(tan, 0.02));
+		if (dot(obj->rigidBody.lineralVel, normal) < 0)
+		{
+			obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, normalVelocity);
+			obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, vmul(normalized(normal), -normVel2));
+			if(normVel2!=0)
+				printf("%g\n", normVel2);
+			//obj->rigidBody.lineralVel = add(obj->rigidBody.lineralVel, 
+			//	vmul(normalized(normalVelocity), (magnitude(normalVelocity)-normVel2)));
+		}
+		obj->rigidBody.lineralVel = sub(obj->rigidBody.lineralVel, vmul(tanVelocity, 0.02));
 
 		Vector3 tanAngularVelocity = cross(normalized(normal), obj->rigidBody.angluarVel);
 		//gizmosDrawLineV3(vecToVector(obj->position), add(vecToVector(obj->position), tanAngularVelocity));
-		obj->rigidBody.lineralVel = sub(obj->rigidBody.lineralVel, vmul(tanAngularVelocity, 0.002));
+		obj->rigidBody.lineralVel = sub(obj->rigidBody.lineralVel, vmul(tanAngularVelocity, obj->rigidBody.angularFriction));
 	}
 }
 void updateCube(Object* obj, float dt)
@@ -262,20 +280,17 @@ void updateCube(Object* obj, float dt)
 		
 		glm_mat4_mulv3(obj->model, ver[i], 0, localVertexPos);
 		glm_vec3_add(obj->position, localVertexPos, vertexPos);
-			
-		if(vertexPos[1]<-3.5f)
+		if(vertexPos[1]<-3.5f && collisionCount<4)
 		{	
 			glm_vec3_copy(vertexPos, collisions[collisionCount]);
 			collisionCount++;
 		}
-		
 	}
-	
 	Vector3 middle = {0,0,0};
 	for(int i=0;i<collisionCount;i++)
 	{
 		vec3 up;
-		glm_vec3_add(collisions[i], (vec3) { 0, 0.3, 0 }, up);
+		glm_vec3_add(collisions[i], (vec3) { 0, 0.3f, 0 }, up);
 		gizmosDrawLine(collisions[i], up);
 
 		middle = add(vecToVector(collisions[i]), middle);
@@ -284,13 +299,13 @@ void updateCube(Object* obj, float dt)
 	{
 		float tr = -3.5f - collisions[0][1];
 		//translateGlobalV3(obj, (Vector3) { 0, tr, 0 });
-		resolveCollision(obj, middle, collisionCount, (Vector3) { 0, tr, 0 });
+		resolveCollision(obj, middle, collisionCount, (Vector3) { 0, tr, 0 }, 0);
 
 	}
-	applyGravity(obj, dt);
 	
-	translateGlobalV3(obj, vmul(obj->rigidBody.lineralVel, dt));
-	rotateAxisV3(obj, dt*sqMagnitude(obj->rigidBody.angluarVel), obj->rigidBody.angluarVel);
+
 	obj->rigidBody.angluarVel = vmul(obj->rigidBody.angluarVel, 0.999f);
+	printf("11 %d\n",dt);
+
 	//printf("%g\n", sqMagnitude(obj->rigidBody.angluarVel));
 }

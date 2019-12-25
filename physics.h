@@ -15,7 +15,7 @@ void RigidBodyWorldInit(RigidBodyWorld* rw);
 void addObjectToWorld(RigidBodyWorld* rw, Object* obj);
 void updatePhysicsWorld(RigidBodyWorld* rw, float deltaTime);
 void computeCubeFall(Object* obj[], size_t count, float deltaTime);
-void computeSomething(Object* obj[], size_t count, float deltaTime);
+void updateBodiesInWorld(Object* obj[], size_t count, float deltaTime);
 Object* castRayToRigidBodies(Vector3 start, Vector3 dir, RigidBodyWorld* rw);
 void addObjectVel(Vector3 pos, Vector3 initVel, ListObjects* list, RigidBodyWorld* rw);
 

@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "baseShader.h"
 #include <stdio.h>
+#include "renderManager.h"
 
 
 char* getShaderFromFile(const char* shaderPath)
@@ -184,4 +185,11 @@ void setMat4(Shader* sh, char* name, GLfloat* val)
 {
 	GLint Location = glGetUniformLocation(sh->Program, name);
 	glUniformMatrix4fv(Location, 1, GL_FALSE, val);
+}
+void setUpStandartShader()
+{
+	setFloat(standartShader, "far_plane", far_plane);
+	setVec3(standartShader, "material.ambient", 1.0f, 0.5f, 0.31f);
+	setVec3(standartShader, "material.specular", 0.5f, 0.5f, 0.5f);
+	setFloat(standartShader, "material.shininess", 16.0f);
 }

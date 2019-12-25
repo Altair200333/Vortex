@@ -68,17 +68,17 @@ void initShadowProperties(LightSource* src)
 	setInt(simpleDepthShader, "depthMap", 1);
 }
 
-void appendLigthSource(LightList* o, LightSource obj)
+void appendLigthSource(LightList* o, LightSource* obj)
 {
 	if (o->lights == NULL)
 	{
-		o->lights = (Object*)malloc(sizeof(LightSource));
+		o->lights = (LightSource**)malloc(sizeof(LightSource*));
 		o->count = 1;
 		o->lights[0] = obj;
 	}
 	else
 	{
-		o->lights = (Object*)realloc(o->lights, sizeof(LightSource)*(o->count + 1));
+		o->lights = (LightSource**)realloc(o->lights, sizeof(LightSource*)*(o->count + 1));
 		o->lights[o->count] = obj;
 		o->count++;
 	}
@@ -156,4 +156,9 @@ LightSource* generatePointLight(vec3 position, float constant, float linear,
 
 	initLight(ls);
 	return ls;
+}
+void initLightList(LightList* ll)
+{
+	ll->count = 0;
+	ll->lights = NULL;
 }

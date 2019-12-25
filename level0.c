@@ -3,7 +3,7 @@
 #include "Scene.h"
 #include "Player.h"
 
-Player pl2;
+
 void initLights2(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, LightSource** ps, LightSource** ps2, LightSource** ps3)
 {
 	*ls = generateDirectionalLight(
@@ -62,7 +62,10 @@ void initLights2(vec3 lightPos, vec3 pointLightPositions[], LightSource** ls, Li
 
 void onStart(Scene scene)
 {
-	
+	standartShader = generateShaderVertFrag("vertexSh1.vs", "fragmentSh.fs");
+	lightShader = generateShaderVertFrag("lightVertexShader.vs", "lightFragmentShader.fs");
+
+	simpleDepthShader = generateShaderVertFragGeom("point_shadows_depth.vs", "point_shadows_depth.fs", "point_shadows_depth.gs");
 }
 
 void onUpdate(Scene scene)

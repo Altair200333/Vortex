@@ -7,11 +7,11 @@
 
 typedef struct _Scene{
 	//list objects in the scene
-	ListObjects sceneObjects;
+	ListObjects* sceneObjects;
 	//list lights in the scene
 	LightList lights;
 	//list rigid bodies in the scene
-	RigidBodyWorld rigidBodyWorld;
+	RigidBodyWorld* rigidBodyWorld;
 
 	//Update method is called every frame
 	void(*onUpdate)(struct _Scene);

@@ -10,7 +10,7 @@
 
 void initRigidBody(Object* obj, int type)
 {
-	obj->rigidBody.type = TYPE_SPHERE;
+	obj->rigidBody.type = type;
 	for (int i = 0; i < 3; i++)
 		obj->rigidBody.angluarVel.axis[i] = 0;
 	for (int i = 0; i < 3; i++)
@@ -19,9 +19,11 @@ void initRigidBody(Object* obj, int type)
 		obj->rigidBody.lineralVel.axis[i] = 0;
 	obj->rigidBody.mass = 1;
 	obj->rigidBody.bounciness = type==TYPE_CUBE?1.2f : 1.4f;
-	obj->rigidBody.theta = 0;
+	obj->rigidBody.angularSaver = type == TYPE_CUBE ? 1:0;
+	obj->rigidBody.angularFriction = type == TYPE_CUBE ? 0.002 : 0.02;
 	obj->rigidBody.friction = type == TYPE_CUBE ? 0.02:0.001;
-	obj->rigidBody.J = type==TYPE_CUBE? 1.1f : 1.0f;
+	obj->rigidBody.J = type==TYPE_CUBE? 1.5f : 1.0f;
+	obj->rigidBody.Jmul = type==TYPE_CUBE? 8.0f : 100.0f;
 }
 
 void setColor(Object* obj, vec3 color)
@@ -194,8 +196,7 @@ void translateGlobal(Object* obj, vec3 shift)
 	glm_mat4_mul(obj->model, mat1, obj->model);
 
 	//hell yea, translate it
-	glm_translate(obj->model,
-		shift);
+	glm_translate(obj->model, shift);
 
 	//set rotation back by right multiplication
 	glm_mat4_mul(obj->model, mat, obj->model);

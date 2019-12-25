@@ -21,4 +21,5 @@ void setMat4(Shader* sh,char* name, GLfloat* val);
 void setFloat(Shader* sh,char* name, float x);
 void setInt(Shader* sh, char* name, int x);
 void setVec3V(Shader* sh, char* name, vec3 param);
+void setUpStandartShader();
 #endif

@@ -70,11 +70,12 @@ typedef struct {
 
 typedef struct
 {
-	LightSource* lights;
+	LightSource** lights;
 	size_t count;
 }LightList;
-void appendLigthSource(LightList* o, LightSource obj);
+void appendLigthSource(LightList* o, LightSource* obj);
 
+void initLightList(LightList* ll);
 
 void initLight(LightSource* src);
 LightSource* generateDirectionalLight(vec3 direction, vec3 ambient, vec3 diffuse, vec3 specular, float strength);

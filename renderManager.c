@@ -225,7 +225,7 @@ void renderListLights(Shader* sh, LightList* list)
 {
 	for (int i = 0; i < list->count; i++)
 	{
-		list->lights[i].render(sh, (struct LightSource*)&(list->lights[i]));
+		list->lights[i]->render(sh, (struct LightSource*)(list->lights[i]));
 	}
 	setInt(sh, "pointLightsCount", currentPointLightId);
 	setInt(sh, "spotLightsCount", currentSpotLightId);

@@ -137,6 +137,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>E:\WORK\C\gpcop\glfw-3.3\include;E:\WORK\C\gpcop\glew-2.1.0\include;E:\WORK\C\gpcop\cglm-master\include;E:\WORK\C\gpcop\freetype-2.10.0\include;E:\WORK\C\gpcop\SDL2-2.0.10\include;$(IncludePath)</IncludePath>
     <LibraryPath>E:\WORK\C\gpcop\freetype-2.10.0\objs\Win32\Debug;E:\WORK\C\gpcop\glew-2.1.0\lib\Release\Win32;E:\WORK\C\gpcop\glfw-3.3\build\CMakeFiles\Export\lib;E:\WORK\C\gpcop\glfw-3.3\build\src\Debug;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Conf|Win32'">
     <IncludePath>E:\WORK\C\gpcop\glfw-3.3\include;E:\WORK\C\gpcop\glew-2.1.0\include;E:\WORK\C\gpcop\cglm-master\include;E:\WORK\C\gpcop\freetype-2.10.0\include;E:\WORK\C\gpcop\SDL2-2.0.10\include;$(IncludePath)</IncludePath>
@@ -191,17 +192,19 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>Level1</WarningLevel>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>freetype.lib;opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Conf|Win32'">

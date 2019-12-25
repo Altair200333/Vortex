@@ -8,6 +8,8 @@
 #include <cglm/mat4.h>
 #include <cglm/types.h>
 #include "worldObject.h"
+#include "GLFW/glfw3.h"
+#include "Scene.h"
 
 typedef struct {
 	mat4 projection;
@@ -19,10 +21,11 @@ typedef struct {
 	Object* selection;
 }Player;
 
-Player initPlayer(float fov, int w, int h);
+Player* initPlayer(float fov, int w, int h);
 void recalculateLookDirection(Player* pl);
 void translatePlayer(Player* pl, vec3 dir);
 void translateMagnitude(Player* pl, vec3 dir, float m);
 void setProjectionView(Player* pl, Shader* s);
+void movePlayer(Player* pl, GLFWwindow* window, float deltaTime, float Fspeed, Scene* scene);
 
 #endif
