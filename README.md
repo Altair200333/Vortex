@@ -7,12 +7,9 @@ If you just want to copy/find some GLSL code you are welcome to fragmentSh.fs fi
 -Render any objects  
 -Phong lighting  
 -Direct and Point shadows  
--(Process)Multiple light sources  
--(Process)Volumetric light  
--(Process)R/B physics  
+-(Process)Multiple light sources(done: multiple point lights)  
+-(Process)R/B physics (done: cube and sphere phisics)
 
 
 Also Very usefull resource is [Link](https://learnopengl.com/)
 
-------------
-Actually, what are you doing here?
